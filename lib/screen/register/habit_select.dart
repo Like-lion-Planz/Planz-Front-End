@@ -92,7 +92,7 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
                 _printHabits();
               },
               style: ElevatedButton.styleFrom(
-                primary: primaryColor,
+                foregroundColor : primaryColor,
                 padding: EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
