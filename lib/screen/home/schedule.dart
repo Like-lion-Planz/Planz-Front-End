@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:planz/const/color.dart';
+
+import '../../widget/routinecreate.dart';
 
 class SchedulePage extends StatefulWidget {
   @override
@@ -7,11 +10,15 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  List<bool> isSelected = [true, false, false]; // Default selection for routines
+  List<bool> isSelected = [
+    true,
+    false,
+    false
+  ]; // Default selection for routines
   DateTime selectedDate = DateTime.now();
   List<Map<String, dynamic>> routines = [
     {
-      'name': '데이 🌟',
+      'name': '데이 ☀️',
       'schedules': [
         {'title': '기상', 'time': '오전 08:00', 'hasAlarm': true},
         {'title': '아침 운동', 'time': '오전 10:00', 'hasAlarm': false},
@@ -86,7 +93,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     return MapEntry(
                       index,
                       Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
                         child: ToggleButtons(
                           children: [
                             _buildRoutineTab(index + 1, routine['name']),
@@ -99,8 +106,8 @@ class _SchedulePageState extends State<SchedulePage> {
                               }
                             });
                           },
-                          fillColor: Colors.teal,
-                          selectedColor: Colors.white,
+                          fillColor: primaryColor,
+                          selectedColor: backgroundColor,
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
@@ -111,13 +118,23 @@ class _SchedulePageState extends State<SchedulePage> {
               ),
             ),
             SizedBox(height: 16),
-            Text('오늘의 스케줄', style: TextStyle(fontSize: 18)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('오늘의 스케줄', style: TextStyle(fontSize: 18)),
+                ElevatedButton(onPressed: () {}, child: Text("추가하기"))
+              ],
+            ),
             SizedBox(height: 16),
-            ...currentSchedules.asMap().entries.map((entry) {
+            ...currentSchedules
+                .asMap()
+                .entries
+                .map((entry) {
               int index = entry.key;
               Map<String, dynamic> schedule = entry.value;
               return _buildScheduleItem(
-                  schedule['title'], schedule['time'], schedule['hasAlarm'], index);
+                  schedule['title'], schedule['time'], schedule['hasAlarm'],
+                  index);
             }).toList(),
           ],
         ),
@@ -150,12 +167,26 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildRoutineTab(int index, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 30),
-      child: Text(
-        '루틴 $index\n$label',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 16),
+    return Center(
+      child: Container(
+        height: 82,
+        width: 72,
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20
+        ),
+        child: Column(
+          children: [
+            Text(
+              '루틴 $index',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14,), //color: routineindextext
+            ),
+            Text(
+              '$label',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12,), //color: routinelabeltext
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -166,65 +197,36 @@ class _SchedulePageState extends State<SchedulePage> {
       child: GestureDetector(
         onTap: () => _showAddRoutineForm(context),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          height: 82,
+          width: 72,
           decoration: BoxDecoration(
             color: Colors.grey[800],
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(Icons.add, color: Colors.grey[400]),
+          child: Image.asset(
+            "asset/img/button/routineaddbutton.png",
+            height: 82, width: 72,
+          ),
         ),
       ),
     );
   }
 
   Future<void> _showAddRoutineForm(BuildContext context) async {
-    TextEditingController routineNameController = TextEditingController();
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return Padding(
-          padding: MediaQuery.of(context).viewInsets,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text('루틴 추가', style: TextStyle(fontWeight: FontWeight.bold)),
-                trailing: IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextField(
-                  controller: routineNameController,
-                  decoration: InputDecoration(
-                    labelText: '루틴 이름 입력',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (routineNameController.text.isNotEmpty) {
-                      setState(() {
-                        routines.add({
-                          'name': routineNameController.text,
-                          'schedules': []
-                        });
-                        isSelected.add(false);
-                      });
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  child: Text('저장'),
-                ),
-              ),
-            ],
-          ),
+        return RoutineBottomSheet(
+          onSave: (String routineName, List<DateTime> selectedDates) {
+            setState(() {
+              routines.add({
+                'name': routineName,
+                'schedules': selectedDates,
+              });
+              isSelected.add(false);
+            });
+          },
         );
       },
     );
@@ -232,10 +234,12 @@ class _SchedulePageState extends State<SchedulePage> {
 
   Widget _buildScheduleItem(String title, String time, bool hasAlarm, int index) {
     return Container(
+      height: 48,
+      width: 345,
+      padding: EdgeInsets.only(left: 20,right: 16),
       margin: EdgeInsets.symmetric(vertical: 8),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: schedulelist,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -245,14 +249,15 @@ class _SchedulePageState extends State<SchedulePage> {
             children: [
               Icon(Icons.circle, size: 10, color: Colors.teal),
               SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: TextStyle(fontSize: 16)),
-                  SizedBox(height: 4),
-                  Text(time, style: TextStyle(fontSize: 16)),
-                ],
+              Container(child: Text(title, style: TextStyle(fontSize: 14, color: Colors.white,)), width: 76,),
+              SizedBox(width: 8),
+              Container(
+                width: 1,
+                height: 24,
+                color: Color(0xFF515863),
               ),
+              SizedBox(width: 8),
+              Container(child: Text(time, style: TextStyle(fontSize: 14, color: Colors.white)),width: 140,),
             ],
           ),
           IconButton(
@@ -270,5 +275,6 @@ class _SchedulePageState extends State<SchedulePage> {
       ),
     );
   }
+
 }
 
