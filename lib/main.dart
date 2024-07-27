@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:planz/screen/consulting.dart';
+import 'package:planz/screen/login.dart';
 import 'package:planz/screen/register/name_input.dart';
+import 'package:planz/screen/splash.dart';
 
 Future<void> main() async {
   runApp(
@@ -27,7 +30,8 @@ Future<void> main() async {
         //       backgroundColor: backgroundColor,
         //     )
         // ),
-        home : NameInputScreen(),
+        home : SplashScreen(),
+   // home: Consulting(),
     ),
   );
 }
