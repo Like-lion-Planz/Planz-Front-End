@@ -178,6 +178,8 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
                 print(_selectedNutrients);
               },
               style: ElevatedButton.styleFrom(
+                foregroundColor : primaryColor,
+
                 backgroundColor : isHabitNull && (!habits.last.isSelected || isNutrientsNull) ? primaryColor : buttonColor,
                 padding: EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(

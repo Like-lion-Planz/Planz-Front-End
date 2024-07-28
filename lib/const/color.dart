@@ -13,6 +13,10 @@ const BODY_TEXT_COLOR = Color(0xFFFBFBFB);
 const HINT_TEXT_COLOR = Color(0xFF7B838F);
 //
 const ACCENT_TEXT_COLOR = Color(0xFFFFD600);
+
+const routinelabeltext = Color(0xFFA5AEBA);
+const routineindextext = Color(0xFFECEEF0);
+const schedulelist = Color(0xFF2F2F30);
 //
 // const INPUT_BG_COLOR = Color(0xFFFBFBFB);
 //
