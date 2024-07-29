@@ -2,13 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:planz/const/color.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:planz/screen/concern/snoring_info.dart';
 
 class Concern {
+  final String id;
   final String imagePath;
   final String title;
   final String label;
 
   Concern({
+    required this.id,
     required this.imagePath,
     required this.title,
     required this.label,
@@ -34,7 +37,7 @@ class _ConsultingState extends State<Consulting> {
       body: Stack(
         children: [
           Positioned(
-            top: 100,
+            top: 80,
             left: 20,
             right: 20,
             child: SearchBar(
@@ -57,7 +60,7 @@ class _ConsultingState extends State<Consulting> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SizedBox(height: 24,),
+                    SizedBox(height: 20,),
                     Text('추천 검색어',
                       style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),),
                     SizedBox(height: 12,),
@@ -78,7 +81,7 @@ class _ConsultingState extends State<Consulting> {
                     Text('가장 많은 고민', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),),
                     SizedBox(height: 14,),
                     ConcernInfo(),
-                    SizedBox(height: 50,),
+                    SizedBox(height: 45,),
                     Text('님을 위한 추천 상담사', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),),
                     SizedBox(height: 14,),
                     Image.asset('assets/images/doctor/doctor1.png'),
@@ -100,40 +103,54 @@ class _ConsultingState extends State<Consulting> {
 class ConcernInfo extends StatelessWidget {
 
   final List<Concern> concernInfo = [
-    Concern(imagePath: 'assets/images/concern/nose.png', title: '코골이를 안 할 수 있는 방법이 있을까요?', label: '무엇보다 생활 습관 개선이 필요해요'),
-    Concern(imagePath:'assets/images/concern/sleep.png', title: '안대와 귀마개가 없으면 잠들기 어려워요', label: '수면 중 소음과 빛에 민감한 것은 얕은 수면이 지속됨을 의미'),
-    Concern(imagePath: 'assets/images/concern/nap.png', title:'낮잠을 너무 오래 자요', label: '가장 흔한 원인은 전날 밤 수면의 양이 부족했거나 수면의 '),
-    // Concern(imagePath: 'assets/images/concern/nose.png', title: '코골이를 안 할 수 있는 방법이 있을까요?', label: '무엇보다 생활 습관 개선이 필요해요'),
-    // Concern(imagePath:'assets/images/concern/sleep.png', title: '안대와 귀마개가 없으면 잠들기 어려워요', label: '수면 중 소음과 빛에 민감한 것은 얕은 수면이 지속됨을 의미'),
-    // Concern(imagePath: 'assets/images/concern/nap.png', title:'낮잠을 너무 오래 자요', label: '가장 흔한 원인은 전날 밤 수면의 양이 부족했거나 수면의 '),
+    Concern(id: 'nose', imagePath: 'assets/images/concern/nose.png', title: '코골이를 안 할 수 있는 방법이 있을까요?', label: '무엇보다 생활 습관 개선이 필요해요'),
+    Concern(id: 'sleep', imagePath:'assets/images/concern/sleep.png', title: '안대와 귀마개가 없으면 잠들기 어려워요', label: '수면 중 소음과 빛에 민감한 것은 얕은 수면이 지속됨을 의미'),
+    Concern(id: 'nap', imagePath: 'assets/images/concern/nap.png', title:'낮잠을 너무 오래 자요', label: '가장 흔한 원인은 전날 밤 수면의 양이 부족했거나 수면의 '),
   ];
 
   @override
   Widget build(BuildContext context) {
-    CarouselController carouselController = CarouselController();
     return Column(
-      children: concernInfo.map((info) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          children: [
-            Image.asset(info.imagePath, width: 88, height: 52),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(info.title,
-                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis, maxLines: 1,),
-                  Text(info.label,
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                    overflow: TextOverflow.ellipsis, maxLines: 1,),
-                ],
-              ),
+      children: concernInfo.map((info) {
+        return GestureDetector(
+          onTap: () {
+            if (info.id == 'nose') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SnoringInfoScreen()),
+              );
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              children: [
+                Image.asset(info.imagePath, width: 88, height: 52),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        info.title,
+                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      Text(
+                        info.label,
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      )).toList(),
+          ),
+        );
+      }).toList(),
     );
   }
 }
