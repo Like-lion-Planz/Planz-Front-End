@@ -1,37 +1,23 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:planz/screen/concern/consulting.dart';
-import 'package:planz/screen/login.dart';
-import 'package:planz/screen/register/name_input.dart';
-import 'package:planz/screen/splash.dart';
 
-Future<void> main() async {
-  runApp(
-    // MultiProvider(
-    //   providers: [
-    //     ChangeNotifierProvider(create: (_) => NFCProvider()),
-    //
-    //   ],
-      MaterialApp(
-        // theme: ThemeData(
-        //     fontFamily: "HancomMalangMalang-Bold",
-        //     appBarTheme: AppBarTheme(
-        //       backgroundColor: backgroundColor,
-        //
-        //     ),
-        //     scaffoldBackgroundColor: Colors.white,
-        //     sliderTheme: SliderThemeData(
-        //         thumbColor: primaryColor,
-        //         activeTickMarkColor: primaryColor,
-        //         inactiveTickMarkColor: primaryColor.withOpacity(0.3)
-        //     ),
-        //     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        //       selectedItemColor: primaryColor,
-        //       unselectedItemColor: secondaryColor,
-        //       backgroundColor: backgroundColor,
-        //     )
-        // ),
-        // home : SplashScreen(),
-   home: Consulting(),
-    ),
-  );
+import 'package:intl/intl.dart';
+import 'package:planz/screen/home/schedule.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
+void main() async{
+  await initializeDateFormatting();
+  runApp(MyApp());
+
 }
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData.dark(),
+      home: SchedulePage(),
+    );
+  }
+}
+

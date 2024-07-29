@@ -35,6 +35,12 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  intl: any
+  table_calendar: ^3.0.2
+  flutter_time_picker_spinner: any
+  http: any
+  carousel_slider: any
+
 
 dev_dependencies:
   flutter_test:
@@ -66,9 +72,9 @@ flutter:
     - assets/images/concern/
     - assets/images/doctor/
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+    - asset/img/button/
+    - asset/img/icon/
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
