@@ -39,6 +39,8 @@ dependencies:
   table_calendar: ^3.0.2
   flutter_time_picker_spinner: any
   http: any
+  carousel_slider: any
+
 
 dev_dependencies:
   flutter_test:
@@ -70,9 +72,8 @@ flutter:
     - assets/images/concern/
     - assets/images/doctor/
   # To add assets to your application, add an assets section, like this:
-  assets:
-   - asset/img/button/
-   - asset/img/icon/
+    - asset/img/button/
+    - asset/img/icon/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
