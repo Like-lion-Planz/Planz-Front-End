@@ -38,6 +38,7 @@ dependencies:
   intl: any
   table_calendar: ^3.0.2
   flutter_time_picker_spinner: any
+  http: any
 
 dev_dependencies:
   flutter_test:

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:planz/const/color.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import '../../widget/routinecreate.dart';
+import '../../const/color.dart';
 
 class SchedulePage extends StatefulWidget {
   @override
@@ -10,11 +12,7 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  List<bool> isSelected = [
-    true,
-    false,
-    false
-  ]; // Default selection for routines
+  List<bool> isSelected = [true, false, false, false]; // Default selection for routines including Routine4
   DateTime selectedDate = DateTime.now();
   List<Map<String, dynamic>> routines = [
     {
@@ -38,6 +36,14 @@ class _SchedulePageState extends State<SchedulePage> {
         {'title': '취침', 'time': '오후 11:00', 'hasAlarm': false},
       ]
     },
+    {
+      'name': '주말 🍹',
+      'schedules': [
+        {'title': '브런치', 'time': '오전 11:00', 'hasAlarm': true},
+        {'title': '산책', 'time': '오후 02:00', 'hasAlarm': false},
+        {'title': '영화 관람', 'time': '오후 07:00', 'hasAlarm': true},
+      ]
+    },
   ];
 
   void _selectDate(BuildContext context) async {
@@ -55,8 +61,14 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> currentSchedules =
-    routines[isSelected.indexOf(true)]['schedules'];
+    // Handle cases where isSelected may be empty or all false
+    int selectedIndex = isSelected.indexOf(true);
+    if (selectedIndex == -1 || selectedIndex >= routines.length) {
+      selectedIndex = 0; // Default to the first routine if none is selected or index is out of bounds
+    }
+
+    List<Map<String, dynamic>> currentSchedules = routines[selectedIndex]['schedules'];
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Planz'),
@@ -98,7 +110,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           children: [
                             _buildRoutineTab(index + 1, routine['name']),
                           ],
-                          isSelected: [isSelected[index]],
+                          isSelected: [isSelected.length > index ? isSelected[index] : false],
                           onPressed: (int buttonIndex) {
                             setState(() {
                               for (int i = 0; i < isSelected.length; i++) {
@@ -126,10 +138,7 @@ class _SchedulePageState extends State<SchedulePage> {
               ],
             ),
             SizedBox(height: 16),
-            ...currentSchedules
-                .asMap()
-                .entries
-                .map((entry) {
+            ...currentSchedules.asMap().entries.map((entry) {
               int index = entry.key;
               Map<String, dynamic> schedule = entry.value;
               return _buildScheduleItem(
@@ -171,19 +180,18 @@ class _SchedulePageState extends State<SchedulePage> {
       child: Container(
         height: 82,
         width: 72,
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
         child: Column(
           children: [
             Text(
               '루틴 $index',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14,), //color: routineindextext
+              style: TextStyle(fontSize: 14),
             ),
             Text(
               '$label',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12,), //color: routinelabeltext
+              style: TextStyle(fontSize: 12),
             ),
           ],
         ),
@@ -214,29 +222,52 @@ class _SchedulePageState extends State<SchedulePage> {
 
   Future<void> _showAddRoutineForm(BuildContext context) async {
     await showModalBottomSheet(
+      backgroundColor: schedulelist,
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
         return RoutineBottomSheet(
-          onSave: (String routineName, List<DateTime> selectedDates) {
-            setState(() {
-              routines.add({
-                'name': routineName,
-                'schedules': selectedDates,
-              });
-              isSelected.add(false);
-            });
+          onSave: (String routineName, TimeOfDay startTime, TimeOfDay endTime, List<DateTime> selectedDates) {
+            _createRoutine(routineName, startTime, endTime, selectedDates);
           },
         );
       },
     );
   }
 
+  Future<void> _createRoutine(String routineName, TimeOfDay startTime, TimeOfDay endTime, List<DateTime> selectedDates) async {
+    final url = 'https://your-api-url.com/routines';
+    final body = json.encode({
+      'title': routineName,
+      'startTime': '${startTime.hour}:${startTime.minute}',
+      'endTime': '${endTime.hour}:${endTime.minute}',
+      'dates': selectedDates.map((date) => date.toIso8601String()).toList(),
+    });
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
+
+    if (response.statusCode == 201) {
+      setState(() {
+        routines.add({
+          'name': routineName,
+          'schedules': [],
+        });
+        isSelected.add(false);
+      });
+    } else {
+      throw Exception('Failed to create routine');
+    }
+  }
+
   Widget _buildScheduleItem(String title, String time, bool hasAlarm, int index) {
     return Container(
       height: 48,
       width: 345,
-      padding: EdgeInsets.only(left: 20,right: 16),
+      padding: EdgeInsets.only(left: 20, right: 16),
       margin: EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: schedulelist,
@@ -249,7 +280,7 @@ class _SchedulePageState extends State<SchedulePage> {
             children: [
               Icon(Icons.circle, size: 10, color: Colors.teal),
               SizedBox(width: 8),
-              Container(child: Text(title, style: TextStyle(fontSize: 14, color: Colors.white,)), width: 76,),
+              Container(child: Text(title, style: TextStyle(fontSize: 14, color: Colors.white)), width: 76),
               SizedBox(width: 8),
               Container(
                 width: 1,
@@ -257,7 +288,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 color: Color(0xFF515863),
               ),
               SizedBox(width: 8),
-              Container(child: Text(time, style: TextStyle(fontSize: 14, color: Colors.white)),width: 140,),
+              Container(child: Text(time, style: TextStyle(fontSize: 14, color: Colors.white)), width: 140),
             ],
           ),
           IconButton(
@@ -275,6 +306,4 @@ class _SchedulePageState extends State<SchedulePage> {
       ),
     );
   }
-
 }
-
