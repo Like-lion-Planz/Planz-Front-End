@@ -1,12 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:planz/const/color.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
-
-import 'package:intl/intl.dart';
+import 'package:planz/const/color.dart';
+import 'package:planz/widget/time%20picker.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RoutineBottomSheet extends StatefulWidget {
-  final Function(String routineName, List<DateTime> selectedDates) onSave;
+  final Function(String routineName, TimeOfDay startTime, TimeOfDay endTime, List<DateTime> selectedDates) onSave;
 
   RoutineBottomSheet({required this.onSave});
 
@@ -15,23 +17,11 @@ class RoutineBottomSheet extends StatefulWidget {
 }
 
 class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
-  final TextEditingController _routineNameController =
-  TextEditingController(text: "데이 🌟");
-
+  final TextEditingController _routineNameController = TextEditingController(text: "데이 🌟");
   TimeOfDay _startTime = TimeOfDay(hour: 6, minute: 0);
   TimeOfDay _endTime = TimeOfDay(hour: 16, minute: 0);
-
   DateTime _focusedDay = DateTime.now();
-  DateTime _selectedDay = DateTime.now();
-  List<DateTime> _selectedDates = [
-    DateTime(2024, 8, 5),
-    DateTime(2024, 8, 6),
-    DateTime(2024, 8, 12),
-    DateTime(2024, 8, 13),
-    DateTime(2024, 8, 19),
-    DateTime(2024, 8, 26),
-    DateTime(2024, 8, 27),
-  ];
+  List<DateTime> _selectedDates = [];
 
   Future<void> _selectTime(BuildContext context, bool isStart) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -48,6 +38,7 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
       });
     }
   }
+
   void _onLeftArrowPressed() {
     setState(() {
       _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
@@ -59,6 +50,7 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
       _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -69,7 +61,7 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
           Row(
             children: [
               Text(
-                '루틴 1',
+                '루틴 생성',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               Spacer(),
@@ -89,21 +81,45 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
           ),
           SizedBox(height: 16),
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Column(
                 children: [
-                  Text('시작'),
-                  hourMinute12H(),
+                  Text('시작',style: TextStyle(color: primaryColor),),
+                  Container(child: CustomTimePicker(),)
+
                 ],
               ),
               Column(
                 children: [
-                  Text('종료'),
-                  hourMinute12H(),
+                  Text('종료', style:TextStyle(color: primaryColor)),
+                  Container(child: CustomTimePicker(),)
                 ],
               ),
             ],
+            // children: [
+            //   Expanded(
+            //     child: Column(
+            //       children: [
+            //         Text('시작 시간'),
+            //         TextButton(
+            //           onPressed: () => _selectTime(context, true),
+            //           child: Text('${_startTime.format(context)}'),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            //   Expanded(
+            //     child: Column(
+            //       children: [
+            //         Text('종료 시간'),
+            //         TextButton(
+            //           onPressed: () => _selectTime(context, false),
+            //           child: Text('${_endTime.format(context)}'),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ],
           ),
           SizedBox(height: 16),
           Text('해당 루틴이 적용되는 날짜를 모두 선택하세요'),
@@ -119,7 +135,6 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
                 _focusedDay = focusedDay;
-
                 if (_selectedDates.contains(selectedDay)) {
                   _selectedDates.remove(selectedDay);
                 } else {
@@ -138,11 +153,10 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-
                     Row(
                       children: [
                         IconButton(
-                          icon: Image.asset('asset/img/icon/left.png'),
+                          icon: Icon(Icons.arrow_left),
                           onPressed: _onLeftArrowPressed,
                         ),
                         Text(
@@ -150,7 +164,7 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
                           style: TextStyle(fontSize: 16.0, color: Colors.white),
                         ),
                         IconButton(
-                          icon: Image.asset('asset/img/icon/right.png'),
+                          icon: Icon(Icons.arrow_right),
                           onPressed: _onRightArrowPressed,
                         ),
                       ],
@@ -169,17 +183,17 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
                 color: primaryColor,
                 shape: BoxShape.circle,
               ),
-              selectedTextStyle: TextStyle(color: schedulelist),
+              selectedTextStyle: TextStyle(color: Colors.white),
               todayDecoration: BoxDecoration(),
               defaultTextStyle: TextStyle(color: Colors.white),
               weekendTextStyle: TextStyle(color: Colors.white),
-              outsideDaysVisible: false,  // Hides the days outside the current month
+              outsideDaysVisible: false,
             ),
           ),
           SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              widget.onSave(_routineNameController.text, _selectedDates);
+              widget.onSave(_routineNameController.text, _startTime, _endTime, _selectedDates);
               Navigator.pop(context);
             },
             child: Text('저장'),
@@ -188,14 +202,36 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
       ),
     );
   }
-
-  Widget hourMinute12H(){
+  Widget hourMinute12HCustomStyle(){
     return new TimePickerSpinner(
       is24HourMode: false,
+      normalTextStyle: TextStyle(
+          fontSize: 20,
+          color: Colors.deepOrange
+      ),
+      highlightedTextStyle: TextStyle(
+          fontSize: 20,
+          color: Colors.yellow
+      ),
+      isForce2Digits: true,
+      minutesInterval: 15,
       onTimeChange: (time) {
         setState(() {
           _focusedDay = time;
         });
+      },
+    );
+  }
+
+  Widget timePicker()
+  {
+    DateTime time = DateTime(2016, 5, 10, 22, 35);
+    return CupertinoDatePicker(
+      initialDateTime: time,
+      mode: CupertinoDatePickerMode.time,
+      use24hFormat: true,
+      onDateTimeChanged: (DateTime newTime) {
+        setState(() => time = newTime);
       },
     );
   }

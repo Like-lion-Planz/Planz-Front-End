@@ -41,6 +41,7 @@ dependencies:
   http: any
   carousel_slider: any
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
