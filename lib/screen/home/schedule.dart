@@ -14,37 +14,38 @@ class SchedulePage extends StatefulWidget {
 class _SchedulePageState extends State<SchedulePage> {
   List<bool> isSelected = [true, false, false, false]; // Default selection for routines including Routine4
   DateTime selectedDate = DateTime.now();
-  List<Map<String, dynamic>> routines = [
-    {
-      'name': '데이 ☀️',
-      'schedules': [
-        {'title': '기상', 'time': '오전 08:00', 'hasAlarm': true},
-        {'title': '아침 운동', 'time': '오전 10:00', 'hasAlarm': false},
-      ]
-    },
-    {
-      'name': '이브닝 🌕',
-      'schedules': [
-        {'title': '이브닝 운동', 'time': '오후 05:00', 'hasAlarm': true},
-        {'title': '저녁 식사', 'time': '오후 07:00', 'hasAlarm': false},
-      ]
-    },
-    {
-      'name': '나이트 🌙',
-      'schedules': [
-        {'title': '밤 산책', 'time': '오후 09:00', 'hasAlarm': true},
-        {'title': '취침', 'time': '오후 11:00', 'hasAlarm': false},
-      ]
-    },
-    {
-      'name': '주말 🍹',
-      'schedules': [
-        {'title': '브런치', 'time': '오전 11:00', 'hasAlarm': true},
-        {'title': '산책', 'time': '오후 02:00', 'hasAlarm': false},
-        {'title': '영화 관람', 'time': '오후 07:00', 'hasAlarm': true},
-      ]
-    },
-  ];
+  List<Map<String, dynamic>> routines = [];
+  List<Map<String, dynamic>> currentSchedules = [];
+  int selectedRoutineIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchRoutines();
+  }
+
+  Future<void> fetchRoutines() async {
+    final response = await http.get(Uri.parse('http://43.203.110.28:8080/api/routines'));
+    if (response.statusCode == 200) {
+      setState(() {
+        routines = List<Map<String, dynamic>>.from(json.decode(response.body));
+      });
+      fetchSchedules(routines[0]['id']);
+    } else {
+      throw Exception('Failed to load routines');
+    }
+  }
+
+  Future<void> fetchSchedules(int routineId) async {
+    final response = await http.get(Uri.parse('http://43.203.110.28:8080/api/routines/$routineId/schedules'));
+    if (response.statusCode == 200) {
+      setState(() {
+        currentSchedules = List<Map<String, dynamic>>.from(json.decode(response.body));
+      });
+    } else {
+      throw Exception('Failed to load schedules');
+    }
+  }
 
   void _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -61,14 +62,6 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Handle cases where isSelected may be empty or all false
-    int selectedIndex = isSelected.indexOf(true);
-    if (selectedIndex == -1 || selectedIndex >= routines.length) {
-      selectedIndex = 0; // Default to the first routine if none is selected or index is out of bounds
-    }
-
-    List<Map<String, dynamic>> currentSchedules = routines[selectedIndex]['schedules'];
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Planz'),
@@ -79,7 +72,9 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         ],
       ),
-      body: Padding(
+      body: routines.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,6 +111,8 @@ class _SchedulePageState extends State<SchedulePage> {
                               for (int i = 0; i < isSelected.length; i++) {
                                 isSelected[i] = i == index;
                               }
+                              selectedRoutineIndex = index;
+                              fetchSchedules(routines[selectedRoutineIndex]['id']);
                             });
                           },
                           fillColor: primaryColor,
@@ -134,7 +131,9 @@ class _SchedulePageState extends State<SchedulePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('오늘의 스케줄', style: TextStyle(fontSize: 18)),
-                ElevatedButton(onPressed: () {}, child: Text("추가하기"))
+                ElevatedButton(onPressed: () {
+                  _showScheduleForm();
+                }, child: Text("추가하기"))
               ],
             ),
             SizedBox(height: 16),
@@ -142,8 +141,7 @@ class _SchedulePageState extends State<SchedulePage> {
               int index = entry.key;
               Map<String, dynamic> schedule = entry.value;
               return _buildScheduleItem(
-                  schedule['title'], schedule['time'], schedule['hasAlarm'],
-                  index);
+                  schedule['content'], schedule['time'], schedule['notification_is_true'], index);
             }).toList(),
           ],
         ),
@@ -235,8 +233,41 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
+  Future<void> _showScheduleForm() async {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('스케줄 추가', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              TextField(
+                decoration: InputDecoration(labelText: '스케줄 입력'),
+              ),
+              // Add your time picker and calendar selection widgets here
+              ElevatedButton(
+                onPressed: () {
+                  // Add routine logic here
+                  setState(() {
+                    routines.add({'name': '새 루틴 ${routines.length + 1}'});
+                    isSelected.add(false);
+                  });
+                  Navigator.pop(context);
+                },
+                child: Text('저장'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _createRoutine(String routineName, TimeOfDay startTime, TimeOfDay endTime, List<DateTime> selectedDates) async {
-    final url = 'https://your-api-url.com/routines';
+    final url = 'http://43.203.110.28:8080/api/routines';
     final body = json.encode({
       'title': routineName,
       'startTime': '${startTime.hour}:${startTime.minute}',
@@ -266,44 +297,29 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget _buildScheduleItem(String title, String time, bool hasAlarm, int index) {
     return Container(
       height: 48,
-      width: 345,
-      padding: EdgeInsets.only(left: 20, right: 16),
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: schedulelist,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.circle, size: 10, color: Colors.teal),
-              SizedBox(width: 8),
-              Container(child: Text(title, style: TextStyle(fontSize: 14, color: Colors.white)), width: 76),
-              SizedBox(width: 8),
-              Container(
-                width: 1,
-                height: 24,
-                color: Color(0xFF515863),
-              ),
-              SizedBox(width: 8),
-              Container(child: Text(time, style: TextStyle(fontSize: 14, color: Colors.white)), width: 140),
-            ],
-          ),
-          IconButton(
-            icon: Icon(
-              hasAlarm ? Icons.alarm : Icons.alarm_off,
-              color: Colors.teal,
-            ),
-            onPressed: () {
-              setState(() {
-                routines[isSelected.indexOf(true)]['schedules'][index]['hasAlarm'] = !hasAlarm;
-              });
-            },
-          ),
-        ],
+      child: ListTile(
+        leading: Icon(
+          Icons.check_box_outline_blank,
+          color: hasAlarm ? Colors.red : Colors.white,
+        ),
+        title: Text(title),
+        subtitle: Text(time),
+        trailing: IconButton(
+          icon: Icon(Icons.more_vert),
+          onPressed: () {
+            _showEditScheduleForm(index);
+          },
+        ),
       ),
     );
+  }
+
+  Future<void> _showEditScheduleForm(int index) async {
+    // Implement the edit schedule form
   }
 }
