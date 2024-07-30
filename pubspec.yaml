@@ -40,6 +40,9 @@ dependencies:
   flutter_time_picker_spinner: any
   http: any
   carousel_slider: any
+  flutter_webview_plugin: any
+  uuid: any
+  webview_flutter: ^4.0.0
 
 
 dev_dependencies:
