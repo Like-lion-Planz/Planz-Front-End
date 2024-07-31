@@ -1,9 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:planz/const/color.dart';
+import 'package:planz/screen/home/testhome.dart';
 import 'package:planz/screen/register/name_input.dart';
+import 'package:http/http.dart' as http;
+// import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'dart:convert';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
+  // Future<void> _loginWithKakao(BuildContext context) async {
+  //   final clientId = 'e6d0bdc9bcbafaf3442ca214d97e8a84';
+  //   final redirectUri = 'http://localhost:8080/api/login/oauth2/kakao';
+  //
+  //   final result = await FlutterWebAuth.authenticate(
+  //     url: 'https://kauth.kakao.com/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&response_type=code',
+  //     callbackUrlScheme: 'myapp',
+  //   );
+  //
+  //   final code = Uri.parse(result).queryParameters['code'];
+  //
+  //   final response = await http.post(
+  //     Uri.parse('http://43.203.110.28:8080/oauth2/authorization/kakao'),
+  //     body: {'code': code},
+  //   );
+  //
+  //   if (response.statusCode == 200) {
+  //     final tokens = json.decode(response.body);
+  //     final accessToken = tokens['accessToken'];
+  //     final refreshToken = tokens['refreshToken'];
+  //
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(builder: (context) => HomePage(user: tokens)),
+  //     );
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Login Failed')),
+  //     );
+  //   }
+  // }
+
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +65,8 @@ class LoginScreen extends StatelessWidget {
             ),
 
             SizedBox(height: 330,),
-            Image.asset('assets/images/login/kakao.png'),
+            GestureDetector(child: Image.asset('assets/images/login/kakao.png'),onTap: () {
+            },),
             SizedBox(height: 16,),
             Image.asset('assets/images/login/google.png'),
             ElevatedButton(onPressed: (){
