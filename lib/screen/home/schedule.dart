@@ -5,6 +5,11 @@ import 'dart:convert';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import '../../widget/routinecreate.dart';
 import '../../const/color.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:time/time.dart';
+import 'package:intl/intl.dart';
+
+
 
 class SchedulePage extends StatefulWidget {
   @override
@@ -12,40 +17,84 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  List<bool> isSelected = [true, false, false, false]; // Default selection for routines including Routine4
+  final storage = FlutterSecureStorage();
+  List<bool> isSelected = [true, false, false, false];
   DateTime selectedDate = DateTime.now();
   List<Map<String, dynamic>> routines = [];
   List<Map<String, dynamic>> currentSchedules = [];
   int selectedRoutineIndex = 0;
 
+
+
   @override
   void initState() {
     super.initState();
-    fetchRoutines();
+    // fetchRoutines();
   }
 
-  Future<void> fetchRoutines() async {
-    final response = await http.get(Uri.parse('http://43.203.110.28:8080/api/routines'));
-    if (response.statusCode == 200) {
-      setState(() {
-        routines = List<Map<String, dynamic>>.from(json.decode(response.body));
-      });
-      fetchSchedules(routines[0]['id']);
-    } else {
-      throw Exception('Failed to load routines');
-    }
-  }
+  // Future<void> fetchRoutines() async {
+  //   try {
+  //     final accessToken = await storage.read(key: 'ACCESS_TOKEN'); // Correct key
+  //     if (accessToken == null) {
+  //       throw Exception('Access token is not available');
+  //     }
+  //
+  //     final response = await http.get(
+  //       Uri.parse('http://43.203.110.28:8080/api/routine'),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Bearer $accessToken',
+  //       },
+  //     );
+  //     print(response.body);
+  //     if (response.statusCode == 200) {
+  //       setState(() {
+  //         routines = List<Map<String, dynamic>>.from(json.decode(response.body)['data']);
+  //       });
+  //       // if (routines.isNotEmpty) {
+  //       //   fetchSchedules(routines[0]['routineId']);
+  //       // }
+  //     } else {
+  //       throw Exception('Failed to load routines');
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching routines: $e');
+  //   }
+  // }
 
-  Future<void> fetchSchedules(int routineId) async {
-    final response = await http.get(Uri.parse('http://43.203.110.28:8080/api/routines/$routineId/schedules'));
-    if (response.statusCode == 200) {
-      setState(() {
-        currentSchedules = List<Map<String, dynamic>>.from(json.decode(response.body));
-      });
-    } else {
-      throw Exception('Failed to load schedules');
-    }
-  }
+  // Future<void> fetchSchedules(int routineId) async {
+  //   try {
+  //     final accessToken = await storage.read(key: 'ACCESS_TOKEN'); // Correct key
+  //
+  //     if (accessToken == null) {
+  //       throw Exception('Access token is not available');
+  //     }
+  //
+  //     final response = await http.get(
+  //       Uri.parse('http://43.203.110.28:8080/api/routine/$routineId'),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Bearer $accessToken',
+  //       },
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       final responseData = json.decode(response.body);
+  //
+  //       if (responseData['statusCode'] == 200) {
+  //         setState(() {
+  //           currentSchedules = List<Map<String, dynamic>>.from(responseData['data']['toDoList']);
+  //         });
+  //       } else {
+  //         print('Error: ${responseData['message']}');
+  //       }
+  //     } else {
+  //       throw Exception('Failed to load schedules');
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching schedules: $e');
+  //   }
+  // }
 
   void _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -54,10 +103,11 @@ class _SchedulePageState extends State<SchedulePage> {
       firstDate: DateTime(2020),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedDate)
+    if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
       });
+    }
   }
 
   @override
@@ -72,9 +122,9 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         ],
       ),
-      body: routines.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
+      body: //routines.isEmpty
+      //     ? Center(child: CircularProgressIndicator())
+         Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +153,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         margin: const EdgeInsets.symmetric(horizontal: 8),
                         child: ToggleButtons(
                           children: [
-                            _buildRoutineTab(index + 1, routine['name']),
+                            _buildRoutineTab(index + 1, routine['routineName']),
                           ],
                           isSelected: [isSelected.length > index ? isSelected[index] : false],
                           onPressed: (int buttonIndex) {
@@ -112,7 +162,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                 isSelected[i] = i == index;
                               }
                               selectedRoutineIndex = index;
-                              fetchSchedules(routines[selectedRoutineIndex]['id']);
+                              // fetchSchedules(routines[selectedRoutineIndex]['routineId']);
                             });
                           },
                           fillColor: primaryColor,
@@ -131,9 +181,12 @@ class _SchedulePageState extends State<SchedulePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('오늘의 스케줄', style: TextStyle(fontSize: 18)),
-                ElevatedButton(onPressed: () {
-                  _showScheduleForm();
-                }, child: Text("추가하기"))
+                ElevatedButton(
+                  onPressed: () {
+                    _showScheduleForm();
+                  },
+                  child: Text("추가하기"),
+                ),
               ],
             ),
             SizedBox(height: 16),
@@ -141,7 +194,11 @@ class _SchedulePageState extends State<SchedulePage> {
               int index = entry.key;
               Map<String, dynamic> schedule = entry.value;
               return _buildScheduleItem(
-                  schedule['content'], schedule['time'], schedule['notification_is_true'], index);
+                schedule['content'],
+                schedule['time'],
+                schedule['notification_is_true'],
+                index,
+              );
             }).toList(),
           ],
         ),
@@ -211,7 +268,8 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
           child: Image.asset(
             "asset/img/button/routineaddbutton.png",
-            height: 82, width: 72,
+            height: 82,
+            width: 72,
           ),
         ),
       ),
@@ -225,7 +283,7 @@ class _SchedulePageState extends State<SchedulePage> {
       isScrollControlled: true,
       builder: (BuildContext context) {
         return RoutineBottomSheet(
-          onSave: (String routineName, TimeOfDay startTime, TimeOfDay endTime, List<DateTime> selectedDates) {
+          onSave: (String routineName, DateTime startTime, DateTime endTime, List<DateTime> selectedDates) {
             _createRoutine(routineName, startTime, endTime, selectedDates);
           },
         );
@@ -252,7 +310,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 onPressed: () {
                   // Add routine logic here
                   setState(() {
-                    routines.add({'name': '새 루틴 ${routines.length + 1}'});
+                    routines.add({'routineName': '새 루틴 ${routines.length + 1}'});
                     isSelected.add(false);
                   });
                   Navigator.pop(context);
@@ -266,34 +324,47 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  Future<void> _createRoutine(String routineName, TimeOfDay startTime, TimeOfDay endTime, List<DateTime> selectedDates) async {
-    final url = 'http://43.203.110.28:8080/api/routines';
-    final body = json.encode({
-      'title': routineName,
-      'startTime': '${startTime.hour}:${startTime.minute}',
-      'endTime': '${endTime.hour}:${endTime.minute}',
-      'dates': selectedDates.map((date) => date.toIso8601String()).toList(),
-    });
+  Future<void> _createRoutine(
+      String routineName, DateTime startTime, DateTime endTime, List<DateTime> selectedDates) async {
+    try {
+      final accessToken = await storage.read(key: 'ACCESS_TOKEN'); // Correct key
 
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: body,
-    );
+      if (accessToken == null) {
+        throw Exception('Access token is not available');
+      }
 
-    if (response.statusCode == 201) {
-      setState(() {
-        routines.add({
-          'name': routineName,
-          'schedules': [],
-        });
-        isSelected.add(false);
+      final url = 'http://43.203.110.28:8080/api/createRoutine';
+      final body = json.encode({
+        'title': routineName,
+        'startTime': '${startTime.hour}:${startTime.minute}',
+        'endTime': '${endTime.hour}:${endTime.minute}',
+        'dates': selectedDates.map((date) => date.toIso8601String()).toList(),
       });
-    } else {
-      throw Exception('Failed to create routine');
+      print(body);
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 201) {
+        setState(() {
+          routines.add({
+            'routineName': routineName,
+            'schedules': [],
+          });
+          isSelected.add(false);
+        });
+      } else {
+        throw Exception('Failed to create routine');
+      }
+    } catch (e) {
+      print('Error creating routine: $e');
     }
   }
-
   Widget _buildScheduleItem(String title, String time, bool hasAlarm, int index) {
     return Container(
       height: 48,
@@ -318,6 +389,7 @@ class _SchedulePageState extends State<SchedulePage> {
       ),
     );
   }
+
 
   Future<void> _showEditScheduleForm(int index) async {
     // Implement the edit schedule form

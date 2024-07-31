@@ -65,13 +65,13 @@ class LoginScreen extends StatelessWidget {
             ),
 
             SizedBox(height: 330,),
-            GestureDetector(child: Image.asset('assets/images/login/kakao.png'),onTap: () {
+            GestureDetector(child: Image.asset('assets/images/login/kakao.png'),onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => KakaoLoginScreen()));
             },),
             SizedBox(height: 16,),
             Image.asset('assets/images/login/google.png'),
-            ElevatedButton(onPressed: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context) => NameInputScreen()));
-            }, child: Text('임시버튼')),
+            // ElevatedButton(onPressed: (){
+            //   Navigator.push(context, MaterialPageRoute(builder: (context) => NameInputScreen()));
+            // }, child: Text('임시버튼')),
           ],
 
         ),
