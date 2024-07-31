@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:planz/screen/login.dart';
 import 'package:planz/screen/register/habit_select.dart';
 import 'package:planz/const/color.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 
 class NameInputScreen extends StatefulWidget {
@@ -12,6 +17,40 @@ class NameInputScreen extends StatefulWidget {
 
 class _NameInputScreenState extends State<NameInputScreen> {
   String name = '';
+  final storage = FlutterSecureStorage();
+
+  Future<void> changename() async {
+    Map data = {"name": name,};
+    var body = json.encode(data);
+    try {
+      final accessToken = await storage.read(key: 'ACCESS_TOKEN'); // Correct key
+
+      if (accessToken == null) {
+        throw Exception('Access token is not available');
+      }
+      final response = await http.patch(
+      Uri.parse('http://43.203.110.28:8080/api/user/changeName'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: body
+      );
+
+      if (response.statusCode == 200) {
+        print(response.body);
+        Navigator.push(
+            context,
+            CupertinoPageRoute(builder: (c) => HabitSelectionScreen())
+        );
+      } else {
+        print(response.body);
+        throw Exception('Failed to load routines');
+      }
+    } catch (e) {
+      print('Error fetching routines: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,10 +99,7 @@ class _NameInputScreenState extends State<NameInputScreen> {
             ElevatedButton(
               onPressed: () {
                 if (name.isNotEmpty) {
-                  Navigator.push(
-                      context,
-                      CupertinoPageRoute(builder: (c) => HabitSelectionScreen())
-                  );
+                  changename();
                 }
                 print(name);
               },

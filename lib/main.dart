@@ -9,6 +9,7 @@ import 'package:planz/screen/prac.dart';
 import 'package:planz/widget/routinecreate.dart';
 
 import 'package:planz/screen/home/testhome.dart';
+import 'package:planz/screen/splash.dart';
 
 
 void main() async{
@@ -22,8 +23,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark(),
-      home: Example(),
-      // home: SchedulePage(),
+      home: SplashScreen(),
     );
   }
 }

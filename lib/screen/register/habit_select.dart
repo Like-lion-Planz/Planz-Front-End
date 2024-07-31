@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:planz/const/color.dart';
 import 'package:planz/screen/register/name_input.dart';
-import 'package:planz/const/color.dart';
 import 'package:planz/screen/register/schedule_input.dart';
 
 class Habit {
@@ -31,10 +30,12 @@ class Nutraceuticals{
   }
 }
 
+
 class HabitSelectionScreen extends StatefulWidget {
   @override
   State<HabitSelectionScreen> createState() => _HabitSelectionScreenState();
 }
+
 
 class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
 

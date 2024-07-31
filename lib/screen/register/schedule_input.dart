@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:planz/const/color.dart';
+import 'package:planz/screen/home/schedule.dart';
 import 'package:planz/screen/register/habit_select.dart';
 
 class ScheduleInputScreen extends StatelessWidget {
@@ -40,6 +41,7 @@ class ScheduleInputScreen extends StatelessWidget {
             Spacer(),
             ElevatedButton(
               onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SchedulePage()));
 
               },
               style: ElevatedButton.styleFrom(
