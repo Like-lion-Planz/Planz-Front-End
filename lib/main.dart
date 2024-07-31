@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:planz/screen/home/schedule.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:planz/screen/prac.dart';
+import 'package:planz/widget/routinecreate.dart';
 
 void main() async{
   await initializeDateFormatting();
@@ -16,7 +18,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark(),
-      home: SchedulePage(),
+      home: Example(),
+      // home: SchedulePage(),
     );
   }
 }
