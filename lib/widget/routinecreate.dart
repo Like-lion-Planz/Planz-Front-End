@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
+import 'package:intl/intl.dart';
 import 'package:planz/const/color.dart';
 import 'package:planz/widget/time%20picker.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -8,7 +9,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class RoutineBottomSheet extends StatefulWidget {
-  final Function(String routineName, TimeOfDay startTime, TimeOfDay endTime, List<DateTime> selectedDates) onSave;
+  final Function(String routineName, DateTime startTime, DateTime endTime, List<DateTime> selectedDates) onSave;
 
   RoutineBottomSheet({required this.onSave});
 
@@ -18,25 +19,23 @@ class RoutineBottomSheet extends StatefulWidget {
 
 class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
   final TextEditingController _routineNameController = TextEditingController(text: "데이 🌟");
-  TimeOfDay _startTime = TimeOfDay(hour: 6, minute: 0);
-  TimeOfDay _endTime = TimeOfDay(hour: 16, minute: 0);
+  DateTime? _startTime;
+  DateTime? _endTime;
   DateTime _focusedDay = DateTime.now();
   List<DateTime> _selectedDates = [];
 
-  Future<void> _selectTime(BuildContext context, bool isStart) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: isStart ? _startTime : _endTime,
-    );
-    if (picked != null) {
-      setState(() {
-        if (isStart) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
-      });
-    }
+  void _handleStartTimeChanged(DateTime newTime) {
+    setState(() {
+      _startTime = newTime;
+      print(_startTime);
+    });
+  }
+
+  void _handleEndTimeChanged(DateTime newTime) {
+    setState(() {
+      _endTime = newTime;
+      print(_endTime);
+    });
   }
 
   void _onLeftArrowPressed() {
@@ -85,14 +84,20 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
               Column(
                 children: [
                   Text('시작',style: TextStyle(color: primaryColor),),
-                  Container(child: CustomTimePicker(),)
+                  Container(child: CustomTimePicker(
+                    onTimeChanged: _handleStartTimeChanged,
+                    initialTime: DateTime(2016, 5, 10, 1, 0),
+                  ),)
 
                 ],
               ),
               Column(
                 children: [
                   Text('종료', style:TextStyle(color: primaryColor)),
-                  Container(child: CustomTimePicker(),)
+                  Container(child: CustomTimePicker(
+                    onTimeChanged: _handleEndTimeChanged,
+                    initialTime: DateTime(2016, 5, 10, 1, 0),
+                  ),)
                 ],
               ),
             ],
@@ -193,7 +198,7 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
           SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              widget.onSave(_routineNameController.text, _startTime, _endTime, _selectedDates);
+              widget.onSave(_routineNameController.text, _startTime!, _endTime!, _selectedDates);
               Navigator.pop(context);
             },
             child: Text('저장'),

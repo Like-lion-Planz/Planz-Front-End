@@ -32,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(height: 360,),
-            Text('spalsh '),
+            //Text('spalsh '),
             Image.asset('assets/images/logo/simbolLogo.png', width: 60, height: 60,),
             Image.asset('assets/images/logo/typeLogo.png',width: 224, height: 58,),
           ],

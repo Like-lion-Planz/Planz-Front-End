@@ -43,6 +43,8 @@ dependencies:
   flutter_webview_plugin: any
   uuid: any
   webview_flutter: ^4.0.0
+  flutter_secure_storage: ^5.0.2
+  time: any
 
 
 dev_dependencies:
