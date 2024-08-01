@@ -18,7 +18,7 @@ class RoutineBottomSheet extends StatefulWidget {
 }
 
 class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
-  final TextEditingController _routineNameController = TextEditingController(text: "데이 🌟");
+  final TextEditingController _routineNameController = TextEditingController(text: "데이");
   DateTime? _startTime;
   DateTime? _endTime;
   DateTime _focusedDay = DateTime.now();

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:planz/screen/root.dart';
 import '../register/name_input.dart';
 
 class KakaoLoginScreen extends StatefulWidget {
@@ -49,7 +50,7 @@ class _KakaoLoginScreenState extends State<KakaoLoginScreen> {
           // 토큰이 유효하다면 다음 화면으로 이동합니다.
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => NameInputScreen()),
+            MaterialPageRoute(builder: (context) => RootTab()),
           );
         } else {
           // 토큰이 유효하지 않다면 삭제합니다.
