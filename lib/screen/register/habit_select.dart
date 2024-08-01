@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:planz/const/color.dart';
@@ -5,56 +8,108 @@ import 'package:planz/screen/register/name_input.dart';
 import 'package:planz/screen/register/schedule_input.dart';
 
 class Habit {
-  final String id;
   final String label;
   final String imagePath;
   bool isSelected;
 
-  Habit({required this.id, required this.label, required this.imagePath, this.isSelected = false});
+  Habit({required this.label, required this.imagePath, this.isSelected = false});
+
   @override
   String toString() {
-    return '$id';
+    return '$label';
   }
 }
 
 class Nutraceuticals{
-  final String id;
   final String label;
   bool isSelected;
 
-  Nutraceuticals({required this.id, required this.label, this.isSelected = false});
+  Nutraceuticals({required this.label, this.isSelected = false});
 
   @override
   String toString(){
-    return '$id';
+    return '$label';
   }
 }
-
 
 class HabitSelectionScreen extends StatefulWidget {
   @override
   State<HabitSelectionScreen> createState() => _HabitSelectionScreenState();
 }
 
-
 class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
+  final storage = FlutterSecureStorage();
+  bool alcohol = false;
+  bool coenzyme = false;
+  bool coffee = false;
+  bool electronicDevices = false;
+  bool exerciseSupplements = false;
+  bool omega3 = false;
+  bool smoking = false;
+  bool tonic = false;
+  bool vitaminb = false;
+  bool vitamind = false;
+
+  Future<void> _createHabits () async {
+    try {
+      final accessToken = await storage.read(key: 'ACCESS_TOKEN'); // Correct key
+
+      if (accessToken == null) {
+        throw Exception('Access token is not available');
+      }
+
+      final url = 'http://43.203.110.28:8080/api/user/habits';
+      final body = json.encode({
+        "alcohol": alcohol,
+        "coenzyme": coenzyme,
+        "coffee": coffee,
+        "electronicDevices": electronicDevices,
+        "exerciseSupplements": exerciseSupplements,
+        "omega3": omega3,
+        "smoking": smoking,
+        "tonic": tonic,
+        "vitaminb": vitaminb,
+        "vitamind": vitamind,
+      });
+
+      print(body);
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: body,
+      );
+      print(response.body);
+      if (response.statusCode == 200) {
+
+      } else {
+        throw Exception('Failed to create habits');
+      }
+    } catch (e) {
+      print('Error creating habits: $e');
+    }
+  }
+
 
   final List<Habit> habits = [
-    Habit(id: 'caffeine', label: '카페인이 들어간 음료를 자주 마셔요', imagePath : 'assets/images/habit/coffee.png'),
-    Habit(id: 'alcohol', label: '술을 자주 마셔요', imagePath: 'assets/images/habit/drink.png'),
-    Habit(id: 'smoking', label: '흡연 습관이 있어요', imagePath: 'assets/images/habit/smoke.png'),
-    Habit(id: 'exercise', label: '격한 운동을 자주 해요',imagePath: 'assets/images/habit/dribbble.png'),
-    Habit(id: 'digital', label: '전자기기를 많이 사용해요',imagePath: 'assets/images/habit/smartphone.png'),
-    Habit(id: 'nutrients', label: '영양제를 챙겨 먹어요',imagePath: 'assets/images/habit/pill.png'),
+    Habit(label: '카페인이 들어간 음료를 자주 마셔요', imagePath : 'assets/images/habit/coffee.png'),
+    Habit(label: '술을 자주 마셔요', imagePath: 'assets/images/habit/drink.png'),
+    Habit(label: '흡연 습관이 있어요', imagePath: 'assets/images/habit/smoke.png'),
+    Habit(label: '격한 운동을 자주 해요',imagePath: 'assets/images/habit/dribbble.png'),
+    Habit(label: '전자기기를 많이 사용해요',imagePath: 'assets/images/habit/smartphone.png'),
+    Habit(label: '영양제를 챙겨 먹어요',imagePath: 'assets/images/habit/pill.png'),
   ];
 
   final List<Nutraceuticals> Nutrients = [
-    Nutraceuticals(id: 'vitaminB', label: '비타민B'),
-    Nutraceuticals(id: 'vitaminD', label: '비타민D'),
-    Nutraceuticals(id: 'omega3', label: '오메가3'),
-    Nutraceuticals(id: 'coenzyme', label: '코엔자임'),
-    Nutraceuticals(id: 'supplement', label: '운동 보충제'),
-    Nutraceuticals(id: 'no', label: '해당 없음'),
+    Nutraceuticals(label: '비타민B'),
+    Nutraceuticals(label: '비타민D'),
+    Nutraceuticals(label: '오메가3'),
+    Nutraceuticals(label: '코엔자임'),
+    Nutraceuticals(label: '운동 보충제'),
+    Nutraceuticals(label: '해당 없음'),
   ];
 
   bool get isHabitNull{
@@ -65,20 +120,65 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
     return Nutrients.any((nutrients) => nutrients.isSelected);
   }
 
-  List<Habit> get selectedHabits {
-    return habits.where((habit) => habit.isSelected).toList();
-  }
+  // List<Habit> get selectedHabits {
+  //   return habits.where((habit) => habit.isSelected).toList();
+  // }
+  //
+  // List<Nutraceuticals> get selectedNutrients {
+  //   return Nutrients.where((nutrients) => nutrients.isSelected).toList();
+  // }
 
-  List<Nutraceuticals> get selectedNutrients {
-    return Nutrients.where((nutrients) => nutrients.isSelected).toList();
-  }
+  // List<Habit> _selectedHabits = [];
+  // List<Nutraceuticals> _selectedNutrients = [];
+  //
+  // void updateSelections() {
+  //   _selectedHabits = selectedHabits;
+  //   _selectedNutrients  = selectedNutrients ;
+  // }
 
-  List<Habit> _selectedHabits = [];
-  List<Nutraceuticals> _selectedNutrients = [];
+  void updateHabitStates() {
+    for (var habit in habits) {
+      switch (habit.label) {
+        case '카페인이 들어간 음료를 자주 마셔요':
+          coffee = habit.isSelected;
+          break;
+        case '술을 자주 마셔요':
+          alcohol = habit.isSelected;
+          break;
+        case '흡연 습관이 있어요':
+          smoking = habit.isSelected;
+          break;
+        case '격한 운동을 자주 해요':
+          exerciseSupplements = habit.isSelected;
+          break;
+        case '전자기기를 많이 사용해요':
+          electronicDevices = habit.isSelected;
+          break;
+        case '영양제를 챙겨 먹어요':
+          tonic = habit.isSelected;
+          break;
+      }
+    }
 
-  void updateSelections() {
-    _selectedHabits = selectedHabits;
-    _selectedNutrients  = selectedNutrients ;
+    for (var nutrient in Nutrients) {
+      switch (nutrient.label) {
+        case '비타민B':
+          vitaminb = nutrient.isSelected;
+          break;
+        case '비타민D':
+          vitamind = nutrient.isSelected;
+          break;
+        case '오메가3':
+          omega3 = nutrient.isSelected;
+          break;
+        case '코엔자임':
+          coenzyme = nutrient.isSelected;
+          break;
+        case '운동 보충제':
+          exerciseSupplements = nutrient.isSelected;
+          break;
+      }
+    }
   }
 
   @override
@@ -126,7 +226,8 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
             SizedBox(height: 40),
             ...habits.map((habit) => HabitButton(habit: habit, onSelected: () {
               setState(() {
-                updateSelections();
+                // updateSelections();
+                // print( _selectedHabits);
               });
             })).toList(),
             SizedBox(height: 20,),
@@ -146,7 +247,8 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
                                 onPressed:(){
                                   setState(() {
                                     nutrients.isSelected = !nutrients.isSelected;
-                                    updateSelections();
+                                    // updateSelections();
+                                    // print(_selectedNutrients);
                                   });
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -171,12 +273,13 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
                 )),
             Spacer(),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (isHabitNull && (!habits.last.isSelected || isNutrientsNull)) {
+                  updateHabitStates();
+                  await _createHabits();
+                  _createHabits;
                   Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleInputScreen()));
                 }
-                print( _selectedHabits);
-                print(_selectedNutrients);
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor : primaryColor,
