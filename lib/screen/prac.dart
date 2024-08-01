@@ -1,9 +1,9 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:planz/const/color.dart';
-import 'package:planz/widget/routinecreate.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart'; // For date formatting
 
 class Example extends StatefulWidget {
   const Example({super.key});
@@ -21,261 +21,317 @@ class Feeling {
 }
 
 class _ExampleState extends State<Example> {
+  final storage = FlutterSecureStorage();
   DateTime _focusedDay = DateTime.now();
-  List<DateTime> _selectedDates = [];
+  DateTime? _selectedDay;
+  Map<DateTime, Feeling> _selectedFeelings = {};
 
   final List<Feeling> feelings = [
-    Feeling(id: 'lively', imagePath: 'assets/images/feeling/lively.png', label: '활기차요'),
-    Feeling(id: 'refreshing', imagePath: 'assets/images/feeling/refreshing.png', label: '상쾌해요'),
+    Feeling(
+        id: 'happy',
+        imagePath: 'assets/images/feeling/lively.png',
+        label: '활기차요'),
+    Feeling(
+        id: 'refreshing',
+        imagePath: 'assets/images/feeling/refreshing.png',
+        label: '상쾌해요'),
     Feeling(id: 'easy', imagePath: 'assets/images/feeling/easy.png', label: '무난해요'),
     Feeling(id: 'tired', imagePath: 'assets/images/feeling/tired.png', label: '피곤해요'),
-    Feeling(id: 'annoying', imagePath: 'assets/images/feeling/annoying.png', label: '짜증나요'),
+    Feeling(
+        id: 'annoying',
+        imagePath: 'assets/images/feeling/annoying.png',
+        label: '짜증나요'),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSleepRecords(_focusedDay).then((_) {
+      if (_selectedFeelings[DateTime.now()] == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showFeelingSelectionSheet(context);
+        });
+      }
+    });
+  }
+
+  Future<void> _fetchSleepRecords(DateTime date) async {
+    try {
+      final accessToken = await storage.read(key: 'ACCESS_TOKEN');
+
+      if (accessToken == null) {
+        throw Exception('Access token is not available');
+      }
+
+      final startOfMonth = DateTime(date.year, date.month, 1);
+      DateTime endOfMonth;
+
+      if (date.month == DateTime.now().month && date.year == DateTime.now().year) {
+        // 현재 월이 선택된 월과 동일할 경우, 오늘 날짜로 endOfMonth 설정
+        endOfMonth = DateTime.now().subtract(Duration(days: 1)); // 오늘을 제외한 전날까지
+      } else {
+        // 일반적인 경우: 선택된 월의 마지막 날
+        endOfMonth = DateTime(date.year, date.month + 1, 0);
+      }
+
+      final Map<DateTime, Feeling> fetchedFeelings = {};
+
+      for (DateTime day = startOfMonth; day.isBefore(endOfMonth.add(Duration(days: 1))); day = day.add(Duration(days: 1))) {
+        final formattedDate = DateFormat('yyyy-MM-ddTHH:mm:ss').format(day.toLocal());
+        final url = Uri.parse('http://43.203.110.28:8080/api/sleepLog/')
+            .replace(queryParameters: {'date': formattedDate});
+        final response = await http.get(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $accessToken',
+          },
+        );
+        print(response.body);
+        if (response.statusCode == 200) {
+          final List<dynamic> records = jsonDecode(response.body);
+          for (var record in records) {
+            final int timestamp = record['date'];
+            final DateTime recordDate = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000, isUtc: true);
+            final String mood = record['mood'];
+            fetchedFeelings[recordDate] = _getFeelingByMood(mood);
+          }
+        } else {
+          print('Failed to load sleep records for $day: ${response.statusCode}');
+        }
+      }
+
+      setState(() {
+        _selectedFeelings = fetchedFeelings;
+      });
+    } catch (e) {
+      print('Error fetching sleep records: $e');
+    }
+  }
+
+  Feeling _getFeelingByMood(String mood) {
+    // Return the appropriate Feeling object based on mood
+    switch (mood) {
+      case 'happy':
+        return feelings.firstWhere((feeling) => feeling.id == 'happy');
+      case 'refreshing':
+        return feelings.firstWhere((feeling) => feeling.id == 'refreshing');
+      case 'easy':
+        return feelings.firstWhere((feeling) => feeling.id == 'easy');
+      case 'tired':
+        return feelings.firstWhere((feeling) => feeling.id == 'tired');
+      case 'annoying':
+        return feelings.firstWhere((feeling) => feeling.id == 'annoying');
+      default:
+        return feelings.firstWhere((feeling) => feeling.id == 'easy');
+    }
+  }
 
   void _onLeftArrowPressed() {
     setState(() {
       _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
+      _fetchSleepRecords(_focusedDay);
     });
   }
 
   void _onRightArrowPressed() {
     setState(() {
       _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
+      _fetchSleepRecords(_focusedDay);
     });
   }
 
-  Future<void> _showPastdayForm(BuildContext context) async {
-    String weekdayString = DateFormat.EEEE('ko_KR').format(_focusedDay);
-
-    //임시 기분
-    Feeling todayFeeling = feelings.firstWhere((feeling) => feeling.id == 'lively');
+  Future<void> _showFeelingSelectionSheet(BuildContext context) async {
+    Feeling? _selectedFeeling;
 
     await showModalBottomSheet(
-        backgroundColor: schedulelist,
-        context: context,
-        builder: (BuildContext context) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: 24,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('${_focusedDay.month}월 ${_focusedDay.day}일 ${weekdayString}', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                    IconButton(onPressed: () {
-                      Navigator.pop(context);
-                    }, icon: Icon(Icons.close, color: Colors.white, size: 30,)),
-                  ],
-                ),
-                SizedBox(height: 24,),
-
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(
-                      children: [
-                        Text('기상 후 기분', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),),
-                        SizedBox(height: 26,),
-                        Row(
-                          children: [
-                            Image.asset(todayFeeling.imagePath, width: 36, height: 36,),
-                            SizedBox(width: 12,),
-                            Container(
-                              width: 80,
-                              height: 36,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(24),
-                                color: primaryColor,
-                              ),
-                              child:Text(todayFeeling.label,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-
-                                ),
-                              ),
-                            )
-                          ],
-                        )
-
-                      ],
-                    ),
-                    Container(
-                      height: 74,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey,
-                        )
-                      ),
-
-                    ),
-                    Column(
-                      children: [
-                        Text('총 수면 시간', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),),
-                        SizedBox(height: 26,),
-                        Container(
-                          width: 80,
-                          height: 36,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            color: primaryColor,
-                          ),
-                          child:Text('8시간',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-
-                  ]
-
-                ),
-
-
-                SizedBox(height: 60,),
-              ],
-            ),
-          );
-        }
-    );
-  }
-
-  Future<void> _showTodayForm(BuildContext context) async {
-    String weekdayString = DateFormat.EEEE('ko_KR').format(_focusedDay);
-
-    await showModalBottomSheet(
-      backgroundColor: schedulelist,
+      backgroundColor: Colors.grey[900],
       context: context,
-      isScrollControlled: true,
       builder: (BuildContext context) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch, // Add this line to make the bottom sheet fit its content
-            children: [
-              SizedBox(height: 24,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('${_focusedDay.month}월 ${_focusedDay.day}일 ${weekdayString}', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                  IconButton(onPressed: () {
-                    Navigator.pop(context);
-                  }, icon: Icon(Icons.close, color: Colors.white, size: 30,)),
-                ],
-              ),
-              SizedBox(height: 12,),
-              Text('오늘 아침 기분은 어떠신가요?',
-                style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),),
-              SizedBox(height: 18,),
-              ...feelings.map((feeling) =>
-                Column(
-                  children: [
-                    ElevatedButton(onPressed: (){},
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
-                        child: Row(
-                        children: [
-                          Image.asset(feeling.imagePath, width: 24, height: 30,),
-                          SizedBox(width: 16,),
-                          Text(feeling.label, style: TextStyle(color: Colors.white, fontSize: 16),),
-                        ],
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('기분 선택',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold)),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 30,
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xff2F2F30),
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          side: BorderSide(
-                            color: buttonColor,
-                            width: 1,
-                          )
-                      ),),
-                    SizedBox(height: 8,),
-                  ],
-
-                )
-              ),
-              SizedBox(height: 16,),
-              Text('오늘 하루 총 몇 시간 수면 했나요?',
-                  style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-              //Timer
-              SizedBox(height: 158,),
-              ElevatedButton(
-                onPressed: () {
-
-                },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor : primaryColor,
-                  backgroundColor: buttonColor,
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    ],
                   ),
-                ),
-                child: Text('저장', style: TextStyle(
-                  color: backgroundColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),),
-              ),
-              SizedBox(height: 28),
-            ],
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  ...feelings.map((feeling) => Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          setModalState(() {
+                            _selectedFeeling = feeling;
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 16.0),
+                          child: Row(
+                            children: [
+                              Image.asset(
+                                feeling.imagePath,
+                                width: 24,
+                                height: 30,
+                              ),
+                              const SizedBox(
+                                width: 16,
+                              ),
+                              Text(
+                                feeling.label,
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xff2F2F30),
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            side: BorderSide(
+                              color: _selectedFeeling == feeling ? Colors.blue : Colors.transparent,
+                              width: 1,
+                            )),
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                    ],
+                  )),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  ElevatedButton(
+                    onPressed: _selectedFeeling == null ? null : () {
+                      if (_selectedDay != null && _selectedFeeling != null) {
+                        setState(() {
+                          _selectedFeelings[_selectedDay!] = _selectedFeeling!;
+                        });
+                        print('Request Body: Day: $_selectedDay, Feeling: $_selectedFeeling');
+                        _saveMoodToServer(_selectedDay!, _selectedFeeling!);
+                      }
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      '저장',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _selectedFeeling == null ? Colors.grey : Colors.blue,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                ],
+              );
+            },
           ),
         );
       },
-    );
+    ).then((_) {
+      setState(() {});
+    });
+  }
+
+  Future<void> _saveMoodToServer(DateTime date, Feeling feeling) async {
+    try {
+      final accessToken = await storage.read(key: 'ACCESS_TOKEN');
+      if (accessToken == null) {
+        throw Exception('Access token is not available');
+      }
+      final url = 'http://43.203.110.28:8080/api/sleepLog/addLog';
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({
+          'date': date.toIso8601String(),
+          'mood': feeling.id,
+          'sleepTime': 8 * 60, // Replace with actual sleep time if needed
+        }),
+      );
+      print(jsonEncode({
+        'date': date.toIso8601String(),
+        'mood': feeling.id,
+        'sleepTime': 8 * 60, // Replace with actual sleep time if needed
+      }));
+
+      if (response.statusCode == 200) {
+        print('Mood saved successfully');
+      } else {
+        print('Failed to save mood: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error saving mood: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    //임시 기분
-    Feeling todayFeeling = feelings.firstWhere((feeling) => feeling.id == 'lively');
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(height: 50,),
+          const SizedBox(
+            height: 50,
+          ),
           Container(
             child: TableCalendar(
-
               locale: 'ko_KR',
               firstDay: DateTime.utc(2020, 1, 1),
               lastDay: DateTime.utc(2030, 12, 31),
               focusedDay: _focusedDay,
-              // selectedDayPredicate: (day) {
-              //   return _selectedDates.any((selectedDay) => isSameDay(selectedDay, day));
-              // },
+              selectedDayPredicate: (day) {
+                return isSameDay(_selectedDay, day);
+              },
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
+                  _selectedDay = selectedDay;
                   _focusedDay = focusedDay;
-                  // if (_selectedDates.contains(selectedDay)) {
-                  //   _selectedDates.remove(selectedDay);
-                  // } else {
-                  //   _selectedDates.add(selectedDay);
-                  // }
                 });
 
-                if (isSameDay(selectedDay, DateTime.now())){
-                  _showTodayForm(context);
-                }else{
-                  _showPastdayForm(context);
+                if (selectedDay.isBefore(DateTime.now())) {
+                  //_showPastDayForm(context, selectedDay);
+                  _showFeelingSelectionSheet(context);
+                } else {
+                  //_showFeelingSelectionSheet(context);
                 }
-
               },
-              headerStyle: HeaderStyle(
+              headerStyle: const HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true,
                 leftChevronVisible: false,
@@ -289,76 +345,135 @@ class _ExampleState extends State<Example> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.arrow_left, size: 35,),
+                            icon: const Icon(
+                              Icons.arrow_left,
+                              size: 35,
+                            ),
                             onPressed: _onLeftArrowPressed,
                           ),
                           Text(
                             '${day.month}월',
-                            style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
                           ),
                           IconButton(
-                            icon: Icon(Icons.arrow_right, size: 35,),
+                            icon: const Icon(
+                              Icons.arrow_right,
+                              size: 35,
+                            ),
                             onPressed: _onRightArrowPressed,
                           ),
                         ],
                       ),
-                      SizedBox(height: 20,),
+                      const SizedBox(
+                        height: 20,
+                      ),
                     ],
                   );
                 },
-                defaultBuilder: (context, day, _focusedDay){
+                defaultBuilder: (context, day, focusedDay) {
+                  Feeling? feeling = _selectedFeelings[day];
                   return Column(
                     children: [
-                      Text(day.day.toString(), style: TextStyle(color: Colors.white),),
-                      Image.asset('assets/images/feeling/default.png', width: 30, height: 30,),
-
+                      Text(
+                        day.day.toString(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      if (feeling != null)
+                        Image.asset(
+                          feeling.imagePath,
+                          width: 30,
+                          height: 30,
+                        )
+                      else
+                        Image.asset(
+                          'assets/images/feeling/default.png',
+                          width: 30,
+                          height: 30,
+                        ),
                     ],
                   );
-                }
+                },
+                selectedBuilder: (context, day, focusedDay) {
+                  Feeling? feeling = _selectedFeelings[day];
+                  return Container(
+                    alignment: Alignment.center,
+                    child: Column(
+                      children: [
+                        Text(
+                          day.day.toString(),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        if (feeling != null)
+                          Image.asset(
+                            feeling.imagePath,
+                            width: 30,
+                            height: 30,
+                          )
+                        else
+                          Image.asset(
+                            'assets/images/feeling/default.png',
+                            width: 30,
+                            height: 30,
+                          ),
+                      ],
+                    ),
+                  );
+                },
               ),
-
-              daysOfWeekStyle: DaysOfWeekStyle(
+              daysOfWeekStyle: const DaysOfWeekStyle(
                 weekdayStyle: TextStyle(color: Colors.white),
                 weekendStyle: TextStyle(color: Colors.white),
               ),
-              calendarStyle: CalendarStyle(
-                isTodayHighlighted: true,
-                selectedTextStyle: TextStyle(color: Colors.white),
-                todayDecoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: primaryColor, // Underline color
-                      width: 1.0,  // Underline width
-                    ),
-                  ),
+              calendarStyle: const CalendarStyle(
+                isTodayHighlighted: false, // 오늘 날짜 강조를 비활성화
+                selectedDecoration: BoxDecoration(
+                  color: Colors.transparent, // 선택된 날짜 배경색을 투명으로 설정
                 ),
-                todayTextStyle: TextStyle(
-                  color: primaryColor,  // Text color for today
-                  fontWeight: FontWeight.bold,
-                ),
+                selectedTextStyle: TextStyle(color: Colors.white), // 선택된 날짜 텍스트 색상
+                todayTextStyle: TextStyle(color: Colors.white), // 오늘 날짜 텍스트 색상
                 defaultTextStyle: TextStyle(color: Colors.white),
                 weekendTextStyle: TextStyle(color: Colors.white),
                 outsideDaysVisible: false,
               ),
             ),
           ),
-          SizedBox(height: 30,),
+          const SizedBox(
+            height: 30,
+          ),
           Container(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 children: [
-                  Text('님을 위한 생활 수칙',
-                    style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),),
-                  SizedBox(height: 18,),
+                  const Text(
+                    '님을 위한 생활 수칙',
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(
+                    height: 18,
+                  ),
                   Image.asset('assets/images/rule/caffeRule.png'),
-                  SizedBox(height: 8,),
+                  const SizedBox(
+                    height: 8,
+                  ),
                   Image.asset('assets/images/rule/smokeRule.png'),
-                  SizedBox(height: 8,),
+                  const SizedBox(
+                    height: 8,
+                  ),
                   Image.asset('assets/images/rule/vitaminRule.png'),
-                  SizedBox(height: 8,),
+                  const SizedBox(
+                    height: 8,
+                  ),
                   Image.asset('assets/images/rule/drinkRule.png'),
-                  SizedBox(height: 8,),
+                  const SizedBox(
+                    height: 8,
+                  ),
                 ],
               ),
             ),
