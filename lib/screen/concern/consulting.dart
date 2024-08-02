@@ -154,8 +154,7 @@ class ConcernInfo extends StatelessWidget {
         return GestureDetector(
           onTap: () {
             if (info.id == 'nose') {
-              Navigator.pop(context);
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => SnoringInfoScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SnoringInfoScreen()));
             }
           },
           child: Padding(

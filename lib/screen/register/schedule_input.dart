@@ -1,9 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:planz/const/color.dart';
-import 'package:planz/screen/home/schedule.dart';
 import 'package:planz/screen/register/habit_select.dart';
-import 'package:planz/screen/register/loading.dart';
 import 'package:planz/screen/root.dart';
 
 class ScheduleInputScreen extends StatelessWidget {
