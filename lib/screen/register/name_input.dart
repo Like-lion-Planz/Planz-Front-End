@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:planz/const/data.dart';
 import 'package:planz/screen/login.dart';
 import 'package:planz/screen/register/habit_select.dart';
 import 'package:planz/const/color.dart';

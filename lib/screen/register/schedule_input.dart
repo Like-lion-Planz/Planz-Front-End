@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:planz/const/color.dart';
 import 'package:planz/screen/register/habit_select.dart';
+import 'package:planz/screen/register/loading.dart';
 import 'package:planz/screen/root.dart';
 import 'package:http/http.dart' as http;
 
@@ -78,10 +79,10 @@ class _ScheduleInputScreenState extends State<ScheduleInputScreen> {
             ),
             Spacer(),
             //스케줄 추가 버튼
-            SizedBox(height: 436,),
+            SizedBox(height: 425,),
             ElevatedButton(
               onPressed: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => RootTab()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LoadingScreen()));
 
               },
               style: ElevatedButton.styleFrom(
