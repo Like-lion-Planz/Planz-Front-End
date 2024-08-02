@@ -22,9 +22,11 @@ class Feeling {
 
 class _ExampleState extends State<Example> {
   final storage = FlutterSecureStorage();
+  dynamic name = '';
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   Map<DateTime, Feeling> _selectedFeelings = {};
+
 
   final List<Feeling> feelings = [
     Feeling(
@@ -43,9 +45,37 @@ class _ExampleState extends State<Example> {
         label: '짜증나요'),
   ];
 
+  Future<void> fetchData() async {
+    try {
+      final accessToken = await storage.read(key: 'ACCESS_TOKEN');
+      if(accessToken == null){
+        throw Exception('Access token is not available');
+      }
+      final response = await http.get(
+        Uri.parse('http://43.203.110.28:8080/api/user'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+
+      if(response.statusCode == 200){
+        setState(() {
+          name = responseData['name'];
+        });
+        print(name);
+      }
+    } catch (e) {
+      print('error fetching: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    fetchData();
     _fetchSleepRecords(_focusedDay).then((_) {
       if (_selectedFeelings[DateTime.now()] == null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -448,8 +478,8 @@ class _ExampleState extends State<Example> {
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 children: [
-                  const Text(
-                    '님을 위한 생활 수칙',
+                   Text(
+                    '$name님을 위한 생활 수칙',
                     style: TextStyle(
                         fontSize: 16,
                         color: Colors.white,

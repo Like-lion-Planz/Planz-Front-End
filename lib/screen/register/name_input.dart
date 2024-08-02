@@ -75,20 +75,22 @@ class _NameInputScreenState extends State<NameInputScreen> {
               backgroundColor: HINT_TEXT_COLOR,
               color: primaryColor,
             ),
-            SizedBox(height: 16,),
+            SizedBox(height: 24,),
             Text(
               '이름을 입력해 주세요',
-              style: TextStyle(color: BODY_TEXT_COLOR, fontSize: 24),
+              style: TextStyle(color: BODY_TEXT_COLOR,
+                  fontSize: 28, fontFamily: 'SUIT', fontStyle: FontStyle.normal, fontWeight: FontWeight.w700, height: 42 / 30),
             ),
             Text(
               '플랜즈에서 어떻게 불러드릴까요?',
-              style: TextStyle(color: HINT_TEXT_COLOR, fontSize: 16),
+              style: TextStyle(color: HINT_TEXT_COLOR, fontSize: 14, fontFamily: 'SUIT', fontStyle: FontStyle.normal, fontWeight: FontWeight.w600, height: 20 / 14),
             ),
+            SizedBox(height: 40,),
             TextFormField(
               textAlign: TextAlign.center,
               autofocus: true,
               decoration: InputDecoration(border: InputBorder.none),
-              style: TextStyle(fontSize: 32, color: BODY_TEXT_COLOR),
+              style: TextStyle(fontSize: 30, color: BODY_TEXT_COLOR, fontFamily: 'SUIT', fontStyle: FontStyle.normal, fontWeight: FontWeight.w700, height: 42 / 30),
               onChanged: (String value){
                 setState(() {
                   name = value;
@@ -103,8 +105,8 @@ class _NameInputScreenState extends State<NameInputScreen> {
                 }
                 print(name);
               },
-
               style: ElevatedButton.styleFrom(
+                minimumSize: Size(345, 56),
                 backgroundColor : name.isNotEmpty ? primaryColor : buttonColor,
                 padding: EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(
@@ -115,8 +117,9 @@ class _NameInputScreenState extends State<NameInputScreen> {
                 '다음',
                 style: TextStyle(
                   color: backgroundColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'SUIT', fontStyle: FontStyle.normal,
                 ),
               ),
             ),

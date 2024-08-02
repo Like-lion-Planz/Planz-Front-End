@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:planz/const/color.dart';
@@ -30,6 +33,41 @@ final List<String> concerns = [
 ];
 
 class _ConsultingState extends State<Consulting> {
+  final storage = FlutterSecureStorage();
+  dynamic name = '';
+
+  @override
+  void initState(){
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    try {
+      final accessToken = await storage.read(key: 'ACCESS_TOKEN');
+      if(accessToken == null){
+        throw Exception('Access token is not available');
+      }
+      final response = await http.get(
+        Uri.parse('http://43.203.110.28:8080/api/user'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+
+      if(response.statusCode == 200){
+        setState(() {
+          name = responseData['name'];
+        });
+        print(name);
+      }
+    } catch (e) {
+      print('error fetching: $e');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,32 +75,34 @@ class _ConsultingState extends State<Consulting> {
       body: Stack(
         children: [
           Positioned(
-            top: 80,
-            left: 20,
-            right: 20,
+            top: 68,
+            left: 24,
+            right: 24,
             child: SearchBar(
-              leading: Icon(Icons.search, color: Colors.white, size: 40, ),
+              leading: Icon(Icons.search, color: Colors.white, size: 24, ),
               backgroundColor: MaterialStatePropertyAll(Color(0xff2F2F30)),
               shape: MaterialStateProperty.all(
-                  ContinuousRectangleBorder(borderRadius: BorderRadius.circular(30))
+                  ContinuousRectangleBorder(borderRadius: BorderRadius.circular(20))
               ),
-              textStyle: MaterialStateProperty.all(TextStyle(color: Colors.white)),
+              textStyle: MaterialStateProperty.all(TextStyle(color: Colors.white, fontFamily: 'SUIT', fontStyle: FontStyle.normal,
+                fontSize: 14, fontWeight: FontWeight.w500, height: 20/14,)),
               hintText: '수면에 대한 고민을 검색해 보세요',
-              hintStyle: MaterialStateProperty.all(TextStyle(color: Colors.white)),
+              hintStyle: MaterialStateProperty.all(TextStyle(color: Colors.white, fontFamily: 'SUIT', fontStyle: FontStyle.normal,
+                fontSize: 14, fontWeight: FontWeight.w500, height: 20/14,)),
             ),
           ),
 
           Padding(
-            padding: const EdgeInsets.only(top: 160.0), // 검색창 아래로 패딩 추가
+            padding: const EdgeInsets.only(top: 130.0), // 검색창 아래로 패딩 추가
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SizedBox(height: 20,),
+                    SizedBox(height: 24,),
                     Text('추천 검색어',
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),),
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, fontFamily: 'SUIT', fontStyle: FontStyle.normal,),),
                     SizedBox(height: 12,),
                     Wrap(
                       spacing: 10,
@@ -71,18 +111,17 @@ class _ConsultingState extends State<Consulting> {
                           backgroundColor: Color(0xFF515863),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24.0), // 원하는 값으로 변경
-
                           ),
-                          label: Text(concern, style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),),
+                          label: Text(concern, style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700,fontFamily: 'SUIT', fontStyle: FontStyle.normal),),
                         )),
                       ],
                     ),
                     SizedBox(height: 32,),
-                    Text('가장 많은 고민', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),),
+                    Text('가장 많은 고민', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700,fontFamily: 'SUIT', fontStyle: FontStyle.normal),),
                     SizedBox(height: 14,),
                     ConcernInfo(),
-                    SizedBox(height: 45,),
-                    Text('님을 위한 추천 상담사', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),),
+                    SizedBox(height: 70,),
+                    Text('$name님을 위한 추천 상담사', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700,fontFamily: 'SUIT', fontStyle: FontStyle.normal),),
                     SizedBox(height: 14,),
                     Image.asset('assets/images/doctor/doctor1.png'),
                     SizedBox(height: 8,),
@@ -115,7 +154,7 @@ class ConcernInfo extends StatelessWidget {
         return GestureDetector(
           onTap: () {
             if (info.id == 'nose') {
-              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SnoringInfoScreen()));
             }
           },
           child: Padding(
@@ -130,13 +169,13 @@ class ConcernInfo extends StatelessWidget {
                     children: [
                       Text(
                         info.title,
-                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700,fontFamily: 'SUIT', fontStyle: FontStyle.normal, height: 20/14),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
                       Text(
                         info.label,
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                        style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w600,fontFamily: 'SUIT', fontStyle: FontStyle.normal, height: 16/12),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),

@@ -39,16 +39,18 @@ class HabitSelectionScreen extends StatefulWidget {
 
 class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
   final storage = FlutterSecureStorage();
-  bool alcohol = false;
-  bool coenzyme = false;
   bool coffee = false;
-  bool electronicDevices = false;
-  bool exerciseSupplements = false;
-  bool omega3 = false;
+  bool alcohol = false;
   bool smoking = false;
+  bool workOut = false;
+  bool electronicDevices = false;
   bool tonic = false;
+
   bool vitaminb = false;
   bool vitamind = false;
+  bool omega3 = false;
+  bool coenzyme = false;
+  bool exerciseSupplements = false;
 
   Future<void> _createHabits () async {
     try {
@@ -60,16 +62,17 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
 
       final url = 'http://43.203.110.28:8080/api/user/habits';
       final body = json.encode({
-        "alcohol": alcohol,
-        "coenzyme": coenzyme,
         "coffee": coffee,
-        "electronicDevices": electronicDevices,
-        "exerciseSupplements": exerciseSupplements,
-        "omega3": omega3,
+        "alcohol": alcohol,
         "smoking": smoking,
+        "workOut" : workOut,
+        "electronicDevices": electronicDevices,
         "tonic": tonic,
         "vitaminb": vitaminb,
         "vitamind": vitamind,
+        "omega3": omega3,
+        "coenzyme": coenzyme,
+        "exerciseSupplements": exerciseSupplements,
       });
 
       print(body);
@@ -92,7 +95,6 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
       print('Error creating habits: $e');
     }
   }
-
 
   final List<Habit> habits = [
     Habit(label: '카페인이 들어간 음료를 자주 마셔요', imagePath : 'assets/images/habit/coffee.png'),
@@ -120,22 +122,6 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
     return Nutrients.any((nutrients) => nutrients.isSelected);
   }
 
-  // List<Habit> get selectedHabits {
-  //   return habits.where((habit) => habit.isSelected).toList();
-  // }
-  //
-  // List<Nutraceuticals> get selectedNutrients {
-  //   return Nutrients.where((nutrients) => nutrients.isSelected).toList();
-  // }
-
-  // List<Habit> _selectedHabits = [];
-  // List<Nutraceuticals> _selectedNutrients = [];
-  //
-  // void updateSelections() {
-  //   _selectedHabits = selectedHabits;
-  //   _selectedNutrients  = selectedNutrients ;
-  // }
-
   void updateHabitStates() {
     for (var habit in habits) {
       switch (habit.label) {
@@ -149,7 +135,7 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
           smoking = habit.isSelected;
           break;
         case '격한 운동을 자주 해요':
-          exerciseSupplements = habit.isSelected;
+          workOut = habit.isSelected;
           break;
         case '전자기기를 많이 사용해요':
           electronicDevices = habit.isSelected;
@@ -206,31 +192,31 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
               color: primaryColor,
             ),
             SizedBox(
-              height: 16,
+              height: 20,
             ),
             Text(
               '생활 습관을 선택해 주세요',
               style: TextStyle(
                 color: BODY_TEXT_COLOR,
-                fontSize: 24,
+                fontSize: 28, fontWeight: FontWeight.w700,
+                fontFamily: 'SUIT', fontStyle: FontStyle.normal,
+                height: 42/28,
               ),
             ),
-            SizedBox(height: 10),
+
             Text(
               '평소 습관을 고려한 생활 수칙을 알려 드려요.',
               style: TextStyle(
                 color: HINT_TEXT_COLOR,
-                fontSize: 16,
+                fontSize: 14, fontWeight: FontWeight.w600,
+                fontFamily: 'SUIT', fontStyle: FontStyle.normal, height: 20/14
               ),
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 24),
             ...habits.map((habit) => HabitButton(habit: habit, onSelected: () {
-              setState(() {
-                // updateSelections();
-                // print( _selectedHabits);
-              });
+              setState(() {});
             })).toList(),
-            SizedBox(height: 20,),
+            SizedBox(height: 24,),
             Visibility(
                 visible: habits.last.isSelected,
                 child: Wrap(
@@ -238,30 +224,32 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
                     Column(
                       children: [
                         Text('평소 챙겨 먹는 영양제 중 해당되는 것을 선택해 주세요',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                          style: TextStyle(color: Colors.white, fontSize: 14,
+                            fontWeight: FontWeight.w700, fontFamily: 'SUIT', fontStyle: FontStyle.normal,),),
                         SizedBox(height: 12,),
                         Wrap(
                           spacing: 8,
+                          runSpacing: 1,
                           children: [
                             ...Nutrients.map((nutrients) => ElevatedButton(
                                 onPressed:(){
                                   setState(() {
                                     nutrients.isSelected = !nutrients.isSelected;
-                                    // updateSelections();
-                                    // print(_selectedNutrients);
                                   });
                                 },
                                 style: ElevatedButton.styleFrom(
+                                  minimumSize: Size(77, 32),
                                   backgroundColor: Color(0xff2F2F30),
                                   side: BorderSide(
                                     color: nutrients.isSelected ? primaryColor : Color(0xff2F2F30),
-                                    width: 3,
+                                    width: 1,
                                   ),
                                 ),
                                 child: Text(nutrients.label,
                                   style: TextStyle(color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14),
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    fontFamily: 'SUIT', fontStyle: FontStyle.normal, height: 20/14),
                                 )
                             )
                             ),
@@ -283,7 +271,6 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor : primaryColor,
-
                 backgroundColor : isHabitNull && (!habits.last.isSelected || isNutrientsNull) ? primaryColor : buttonColor,
                 padding: EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(
@@ -295,8 +282,9 @@ class _HabitSelectionScreenState extends State<HabitSelectionScreen> {
                 '다음',
                 style: TextStyle(
                   color: backgroundColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'SUIT', fontStyle: FontStyle.normal,
                 ),
               ),
             ),
@@ -325,6 +313,7 @@ class HabitButton extends StatelessWidget {
           onSelected();
         },
         style: ElevatedButton.styleFrom(
+
             backgroundColor: Color(0xff2F2F30),
             padding: EdgeInsets.symmetric(vertical: 15),
             shape: RoundedRectangleBorder(
@@ -332,22 +321,22 @@ class HabitButton extends StatelessWidget {
             ),
             side: BorderSide(
               color: habit.isSelected ? primaryColor : Color(0xff2F2F30),
-              width: 3,
+              width: 1,
             )
         ),
         child: Row(
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 16.0),
+              padding: const EdgeInsets.only(left: 20.0),
               child: Image.asset(
                 habit.imagePath,
-                width: 30,
-                height: 30,
+                width: 24,
+                height: 24,
               ),
             ),
-            SizedBox(width: 10,),
+            SizedBox(width: 14,),
             Expanded(child: Text(habit.label, style: TextStyle(
-              fontSize: 18, color: Colors.white,
+              fontSize: 16, color: Colors.white, fontFamily: 'SUIT', fontStyle: FontStyle.normal, fontWeight: FontWeight.w600
             ),
               textAlign: TextAlign.left,))
           ],
