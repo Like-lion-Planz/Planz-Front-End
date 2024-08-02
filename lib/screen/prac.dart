@@ -147,117 +147,120 @@ class _ExampleState extends State<Example> {
     await showModalBottomSheet(
       backgroundColor: Colors.grey[900],
       context: context,
+      isScrollControlled: true,
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(
-                    height: 24,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('기분 선택',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold)),
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                          size: 30,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 12,
-                  ),
-                  ...feelings.map((feeling) => Column(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          setModalState(() {
-                            _selectedFeeling = feeling;
-                          });
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                feeling.imagePath,
-                                width: 24,
-                                height: 30,
-                              ),
-                              const SizedBox(
-                                width: 16,
-                              ),
-                              Text(
-                                feeling.label,
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 16),
-                              ),
-                            ],
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setModalState) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(
+                      height: 24,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('기분 선택',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold)),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 30,
                           ),
                         ),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xff2F2F30),
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 12,
+                    ),
+                    ...feelings.map((feeling) => Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            setModalState(() {
+                              _selectedFeeling = feeling;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 16.0),
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  feeling.imagePath,
+                                  width: 24,
+                                  height: 30,
+                                ),
+                                const SizedBox(
+                                  width: 16,
+                                ),
+                                Text(
+                                  feeling.label,
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 16),
+                                ),
+                              ],
                             ),
-                            side: BorderSide(
-                              color: _selectedFeeling == feeling ? Colors.blue : Colors.transparent,
-                              width: 1,
-                            )),
-                      ),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                    ],
-                  )),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  ElevatedButton(
-                    onPressed: _selectedFeeling == null ? null : () {
-                      if (_selectedDay != null && _selectedFeeling != null) {
-                        setState(() {
-                          _selectedFeelings[_selectedDay!] = _selectedFeeling!;
-                        });
-                        print('Request Body: Day: $_selectedDay, Feeling: $_selectedFeeling');
-                        _saveMoodToServer(_selectedDay!, _selectedFeeling!);
-                      }
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      '저장',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xff2F2F30),
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              side: BorderSide(
+                                color: _selectedFeeling == feeling ? Colors.blue : Colors.transparent,
+                                width: 1,
+                              )),
+                        ),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                      ],
+                    )),
+                    const SizedBox(
+                      height: 16,
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _selectedFeeling == null ? Colors.grey : Colors.blue,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    ElevatedButton(
+                      onPressed: _selectedFeeling == null ? null : () {
+                        if (_selectedDay != null && _selectedFeeling != null) {
+                          setState(() {
+                            _selectedFeelings[_selectedDay!] = _selectedFeeling!;
+                          });
+                          print('Request Body: Day: $_selectedDay, Feeling: $_selectedFeeling');
+                          _saveMoodToServer(_selectedDay!, _selectedFeeling!);
+                        }
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        '저장',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _selectedFeeling == null ? Colors.grey : Colors.blue,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                ],
-              );
-            },
+                    const SizedBox(
+                      height: 16,
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         );
       },
@@ -304,103 +307,79 @@ class _ExampleState extends State<Example> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 50,
-          ),
-          Container(
-            child: TableCalendar(
-              locale: 'ko_KR',
-              firstDay: DateTime.utc(2020, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 50,
+            ),
+            Container(
+              child: TableCalendar(
+                locale: 'ko_KR',
+                firstDay: DateTime.utc(2020, 1, 1),
+                lastDay: DateTime.utc(2030, 12, 31),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) {
+                  return isSameDay(_selectedDay, day);
+                },
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  });
 
-                if (selectedDay.isBefore(DateTime.now())) {
-                  //_showPastDayForm(context, selectedDay);
-                  _showFeelingSelectionSheet(context);
-                } else {
-                  //_showFeelingSelectionSheet(context);
-                }
-              },
-              headerStyle: const HeaderStyle(
-                formatButtonVisible: false,
-                titleCentered: true,
-                leftChevronVisible: false,
-                rightChevronVisible: false,
-              ),
-              calendarBuilders: CalendarBuilders(
-                headerTitleBuilder: (context, day) {
-                  return Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.arrow_left,
-                              size: 35,
-                            ),
-                            onPressed: _onLeftArrowPressed,
-                          ),
-                          Text(
-                            '${day.month}월',
-                            style: const TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.arrow_right,
-                              size: 35,
-                            ),
-                            onPressed: _onRightArrowPressed,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                    ],
-                  );
+                  if (selectedDay.isBefore(DateTime.now())) {
+                    //_showPastDayForm(context, selectedDay);
+                    _showFeelingSelectionSheet(context);
+                  } else {
+                    //_showFeelingSelectionSheet(context);
+                  }
                 },
-                defaultBuilder: (context, day, focusedDay) {
-                  Feeling? feeling = _selectedFeelings[day];
-                  return Column(
-                    children: [
-                      Text(
-                        day.day.toString(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      if (feeling != null)
-                        Image.asset(
-                          feeling.imagePath,
-                          width: 30,
-                          height: 30,
-                        )
-                      else
-                        Image.asset(
-                          'assets/images/feeling/default.png',
-                          width: 30,
-                          height: 30,
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                  leftChevronVisible: false,
+                  rightChevronVisible: false,
+                ),
+                calendarBuilders: CalendarBuilders(
+                  headerTitleBuilder: (context, day) {
+                    return Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.arrow_left,
+                                size: 35,
+                              ),
+                              onPressed: _onLeftArrowPressed,
+                            ),
+                            Text(
+                              '${day.month}월',
+                              style: const TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.arrow_right,
+                                size: 35,
+                              ),
+                              onPressed: _onRightArrowPressed,
+                            ),
+                          ],
                         ),
-                    ],
-                  );
-                },
-                selectedBuilder: (context, day, focusedDay) {
-                  Feeling? feeling = _selectedFeelings[day];
-                  return Container(
-                    alignment: Alignment.center,
-                    child: Column(
+                        const SizedBox(
+                          height: 20,
+                        ),
+                      ],
+                    );
+                  },
+                  defaultBuilder: (context, day, focusedDay) {
+                    Feeling? feeling = _selectedFeelings[day];
+                    return Column(
                       children: [
                         Text(
                           day.day.toString(),
@@ -419,66 +398,92 @@ class _ExampleState extends State<Example> {
                             height: 30,
                           ),
                       ],
-                    ),
-                  );
-                },
-              ),
-              daysOfWeekStyle: const DaysOfWeekStyle(
-                weekdayStyle: TextStyle(color: Colors.white),
-                weekendStyle: TextStyle(color: Colors.white),
-              ),
-              calendarStyle: const CalendarStyle(
-                isTodayHighlighted: false, // 오늘 날짜 강조를 비활성화
-                selectedDecoration: BoxDecoration(
-                  color: Colors.transparent, // 선택된 날짜 배경색을 투명으로 설정
+                    );
+                  },
+                  selectedBuilder: (context, day, focusedDay) {
+                    Feeling? feeling = _selectedFeelings[day];
+                    return Container(
+                      alignment: Alignment.center,
+                      child: Column(
+                        children: [
+                          Text(
+                            day.day.toString(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          if (feeling != null)
+                            Image.asset(
+                              feeling.imagePath,
+                              width: 30,
+                              height: 30,
+                            )
+                          else
+                            Image.asset(
+                              'assets/images/feeling/default.png',
+                              width: 30,
+                              height: 30,
+                            ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-                selectedTextStyle: TextStyle(color: Colors.white), // 선택된 날짜 텍스트 색상
-                todayTextStyle: TextStyle(color: Colors.white), // 오늘 날짜 텍스트 색상
-                defaultTextStyle: TextStyle(color: Colors.white),
-                weekendTextStyle: TextStyle(color: Colors.white),
-                outsideDaysVisible: false,
+                daysOfWeekStyle: const DaysOfWeekStyle(
+                  weekdayStyle: TextStyle(color: Colors.white),
+                  weekendStyle: TextStyle(color: Colors.white),
+                ),
+                calendarStyle: const CalendarStyle(
+                  isTodayHighlighted: false, // 오늘 날짜 강조를 비활성화
+                  selectedDecoration: BoxDecoration(
+                    color: Colors.transparent, // 선택된 날짜 배경색을 투명으로 설정
+                  ),
+                  selectedTextStyle: TextStyle(color: Colors.white), // 선택된 날짜 텍스트 색상
+                  todayTextStyle: TextStyle(color: Colors.white), // 오늘 날짜 텍스트 색상
+                  defaultTextStyle: TextStyle(color: Colors.white),
+                  weekendTextStyle: TextStyle(color: Colors.white),
+                  outsideDaysVisible: false,
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Container(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
-                children: [
-                  const Text(
-                    '님을 위한 생활 수칙',
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(
-                    height: 18,
-                  ),
-                  Image.asset('assets/images/rule/caffeRule.png'),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Image.asset('assets/images/rule/smokeRule.png'),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Image.asset('assets/images/rule/vitaminRule.png'),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Image.asset('assets/images/rule/drinkRule.png'),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                ],
-              ),
+            const SizedBox(
+              height: 30,
             ),
-          )
-        ],
+            Container(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
+                  children: [
+                    const Text(
+                      '님을 위한 생활 수칙',
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(
+                      height: 18,
+                    ),
+                    Image.asset('assets/images/rule/caffeRule.png'),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Image.asset('assets/images/rule/smokeRule.png'),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Image.asset('assets/images/rule/vitaminRule.png'),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Image.asset('assets/images/rule/drinkRule.png'),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

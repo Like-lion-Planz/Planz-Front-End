@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:planz/const/color.dart';
 import 'package:planz/screen/home/testhome.dart';
@@ -5,6 +6,8 @@ import 'package:planz/screen/register/name_input.dart';
 import 'package:http/http.dart' as http;
 // import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'dart:convert';
+
+import 'package:planz/screen/root.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -68,7 +71,7 @@ class LoginScreen extends StatelessWidget {
             GestureDetector(child: Image.asset('assets/images/login/kakao.png'),onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => KakaoLoginScreen()));
             },),
             SizedBox(height: 16,),
-            Image.asset('assets/images/login/google.png'),
+            GestureDetector(child: Image.asset('assets/images/login/google.png'),onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => RootTab()));}),
             // ElevatedButton(onPressed: (){
             //   Navigator.push(context, MaterialPageRoute(builder: (context) => NameInputScreen()));
             // }, child: Text('임시버튼')),
