@@ -1,15 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
-import 'package:intl/intl.dart';
-import 'package:planz/const/color.dart';
 import 'package:planz/widget/time%20picker.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../const/color.dart';
 
 class RoutineBottomSheet extends StatefulWidget {
-  final Function(String routineName, DateTime startTime, DateTime endTime, List<DateTime> selectedDates) onSave;
+  final Function(String routineName, DateTime startTime, DateTime endTime,
+      List<DateTime> selectedDates) onSave;
 
   RoutineBottomSheet({required this.onSave});
 
@@ -18,11 +17,20 @@ class RoutineBottomSheet extends StatefulWidget {
 }
 
 class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
-  final TextEditingController _routineNameController = TextEditingController(text: "데이");
+  final TextEditingController _routineNameController =
+  TextEditingController(text: "데이");
   DateTime? _startTime;
   DateTime? _endTime;
   DateTime _focusedDay = DateTime.now();
   List<DateTime> _selectedDates = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with default times
+    _startTime = DateTime(2016, 5, 10, 1, 0); // 1:00 AM
+    _endTime = DateTime(2016, 5, 10, 1, 0); // 1:00 AM
+  }
 
   void _handleStartTimeChanged(DateTime newTime) {
     setState(() {
@@ -49,6 +57,12 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
       _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
     });
   }
+
+  bool get _isSaveButtonEnabled =>
+      _routineNameController.text.isNotEmpty &&
+          _startTime != null &&
+          _endTime != null &&
+          _selectedDates.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -77,54 +91,44 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
             decoration: InputDecoration(
               labelText: '루틴의 이름을 입력하세요',
             ),
+            onChanged: (_) => setState(() {}),
           ),
           SizedBox(height: 16),
           Row(
             children: [
               Column(
                 children: [
-                  Text('시작',style: TextStyle(color: primaryColor),),
-                  Container(child: CustomTimePicker(
-                    onTimeChanged: _handleStartTimeChanged,
-                    initialTime: DateTime(2016, 5, 10, 1, 0),
-                  ),)
-
+                  Text(
+                    '시작',
+                    style: TextStyle(color: primaryColor),
+                  ),
+                  Container(
+                    child: CustomTimePicker(
+                      onTimeChanged: _handleStartTimeChanged,
+                      initialTime: _startTime!,
+                    ),
+                  )
                 ],
+              ),
+              SizedBox(
+                width: 49,
+              ),
+              Container(
+                width: 2,
+                color: Colors.grey,
               ),
               Column(
                 children: [
-                  Text('종료', style:TextStyle(color: primaryColor)),
-                  Container(child: CustomTimePicker(
-                    onTimeChanged: _handleEndTimeChanged,
-                    initialTime: DateTime(2016, 5, 10, 1, 0),
-                  ),)
+                  Text('종료', style: TextStyle(color: primaryColor)),
+                  Container(
+                    child: CustomTimePicker(
+                      onTimeChanged: _handleEndTimeChanged,
+                      initialTime: _endTime!,
+                    ),
+                  )
                 ],
               ),
             ],
-            // children: [
-            //   Expanded(
-            //     child: Column(
-            //       children: [
-            //         Text('시작 시간'),
-            //         TextButton(
-            //           onPressed: () => _selectTime(context, true),
-            //           child: Text('${_startTime.format(context)}'),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            //   Expanded(
-            //     child: Column(
-            //       children: [
-            //         Text('종료 시간'),
-            //         TextButton(
-            //           onPressed: () => _selectTime(context, false),
-            //           child: Text('${_endTime.format(context)}'),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ],
           ),
           SizedBox(height: 16),
           Text('해당 루틴이 적용되는 날짜를 모두 선택하세요'),
@@ -135,7 +139,8 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
             lastDay: DateTime.utc(2030, 12, 31),
             focusedDay: _focusedDay,
             selectedDayPredicate: (day) {
-              return _selectedDates.any((selectedDay) => isSameDay(selectedDay, day));
+              return _selectedDates
+                  .any((selectedDay) => isSameDay(selectedDay, day));
             },
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
@@ -195,29 +200,53 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
               outsideDaysVisible: false,
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () {
-              widget.onSave(_routineNameController.text, _startTime!, _endTime!, _selectedDates);
+            onPressed: _isSaveButtonEnabled
+                ? () {
+              widget.onSave(
+                _routineNameController.text,
+                _startTime!,
+                _endTime!,
+                _selectedDates,
+              );
               Navigator.pop(context);
-            },
-            child: Text('저장'),
+              setState(() {
+
+              });
+            }
+                : null,
+            style: ElevatedButton.styleFrom(
+              minimumSize: Size(345, 28),
+              foregroundColor: primaryColor,
+              backgroundColor:
+              _isSaveButtonEnabled ? primaryColor : Colors.orange,
+              padding: EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+
+            child: Text(
+              '저장',
+              style: TextStyle(
+                color: backgroundColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
+          SizedBox(height: 28,)
         ],
       ),
     );
   }
-  Widget hourMinute12HCustomStyle(){
+
+  Widget hourMinute12HCustomStyle() {
     return new TimePickerSpinner(
       is24HourMode: false,
-      normalTextStyle: TextStyle(
-          fontSize: 20,
-          color: Colors.deepOrange
-      ),
-      highlightedTextStyle: TextStyle(
-          fontSize: 20,
-          color: Colors.yellow
-      ),
+      normalTextStyle: TextStyle(fontSize: 20, color: Colors.deepOrange),
+      highlightedTextStyle: TextStyle(fontSize: 20, color: Colors.yellow),
       isForce2Digits: true,
       minutesInterval: 15,
       onTimeChange: (time) {
@@ -228,8 +257,7 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
     );
   }
 
-  Widget timePicker()
-  {
+  Widget timePicker() {
     DateTime time = DateTime(2016, 5, 10, 22, 35);
     return CupertinoDatePicker(
       initialDateTime: time,
