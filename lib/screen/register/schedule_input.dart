@@ -44,7 +44,7 @@ class ScheduleInputScreen extends StatelessWidget {
             SizedBox(height: 436,),
             ElevatedButton(
               onPressed: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => LoadingScreen()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => RootTab()));
 
               },
               style: ElevatedButton.styleFrom(

@@ -31,7 +31,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
        if(accessToken == null){
          throw Exception('Access token is not available');
        }
-       
        final response = await http.get(
          Uri.parse('http://43.203.110.28:8080/api/user'),
          headers: {
@@ -39,7 +38,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
            'Authorization': 'Bearer $accessToken',
          },
        );
-
 
        final responseData = jsonDecode(utf8.decode(response.bodyBytes));
 
@@ -49,11 +47,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
          });
          print(name);
        }
-
     } catch (e) {
         print('error fetching: $e');
     }
-
   }
 
   @override
