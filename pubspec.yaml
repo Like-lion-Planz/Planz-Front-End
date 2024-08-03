@@ -45,6 +45,7 @@ dependencies:
   webview_flutter: ^4.0.0
   flutter_secure_storage: ^5.0.2
   time: any
+  flutter_launcher_icons: any
 
 
 dev_dependencies:
@@ -58,6 +59,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  icons_launcher: ^2.1.7
+  flutter_launcher_icons: ^0.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -105,4 +108,15 @@ flutter:
         - asset: assets/fonts/SUIT-ttf/SUIT-Medium.ttf
           weight: 500
   #
+icons_launcher:
+  image_path: 'assets/images/app_logo.png'					#여기에 아이콘의 경로를 넣어줍니다.
+  platforms:
+    android:
+      enable: true											#안드로이드용
+      adaptive_background_color: '#320067'					#여기에 아이콘이 배경색상을 정해줍니다. (HEX코드)
+      adaptive_foreground_image: 'assets/app_logo.png'	#여기에 아이콘의 경로를 넣어줍니다.
 
+    ios:
+      enable: true											#아이폰용
+      image_path: 'assets/images/app_logo.png'					#여기에 아이콘의 경로를 넣어줍니다.
+      adaptive_background_color: '#320067'

@@ -15,6 +15,7 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
+  final basurl = "";
   final storage = FlutterSecureStorage();
   List<bool> isSelected = [true, false, false, false];
   DateTime selectedDate = DateTime.now();
@@ -27,7 +28,6 @@ class _SchedulePageState extends State<SchedulePage> {
     super.initState();
     fetchRoutines();
   }
-
   Future<void> fetchRoutines() async {
     try {
       final accessToken = await storage.read(key: 'ACCESS_TOKEN');
@@ -227,11 +227,12 @@ class _SchedulePageState extends State<SchedulePage> {
       },
       child: Center(
         child: Container(
+          margin: EdgeInsets.fromLTRB(8, 0,0,0),
           height: 82,
           width: 72,
           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.blue : Color(0xFF2f2f30), // Change color if selected
+            color: isSelected ? primaryColor : Color(0xFF2f2f30), // Change color if selected
             borderRadius: BorderRadius.circular(8.0),
             border: Border.all(
               color: isSelected ? Colors.white : Colors.transparent,
