@@ -120,6 +120,7 @@ class _ScheduleInputScreenState extends State<ScheduleInputScreen> {
       },
       child: Center(
         child: Container(
+          margin: EdgeInsets.fromLTRB(8, 0,0,0),
           height: 82,
           width: 72,
           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
