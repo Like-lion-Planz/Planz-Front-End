@@ -15,7 +15,7 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  final basurl = "";
+  final basurl = "https://c482-118-42-152-155.ngrok-free.app";
   final storage = FlutterSecureStorage();
   List<bool> isSelected = [true, false, false, false];
   DateTime selectedDate = DateTime.now();
@@ -28,6 +28,8 @@ class _SchedulePageState extends State<SchedulePage> {
     super.initState();
     fetchRoutines();
   }
+
+
   Future<void> fetchRoutines() async {
     try {
       final accessToken = await storage.read(key: 'ACCESS_TOKEN');
@@ -36,11 +38,11 @@ class _SchedulePageState extends State<SchedulePage> {
       }
 
       final response = await http.get(
-        Uri.parse('https://3611-118-42-152-155.ngrok-free.app/api/routine'),
+        Uri.parse('$basurl/api/routine'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization':
-          'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjYwODk2NCwiZXhwIjoxNzIyNjEyNTY0fQ.SyTMHqWIPRCQQvlvcDKFPsPlS4URHTBsPXqfcPZAgyY',
+          'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjY2Mzg5MCwiZXhwIjoxNzIyNjY3NDkwfQ.SVeT7vE48COCtw7zkYpNyMA0TfuVNV8HmQEPDCCpAEk',
         },
       );
 
@@ -71,11 +73,11 @@ class _SchedulePageState extends State<SchedulePage> {
       }
 
       final response = await http.get(
-        Uri.parse('https://3611-118-42-152-155.ngrok-free.app/api/routine/$routineId'),
+        Uri.parse('$basurl/api/routine/$routineId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization':
-          'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjYwODk2NCwiZXhwIjoxNzIyNjEyNTY0fQ.SyTMHqWIPRCQQvlvcDKFPsPlS4URHTBsPXqfcPZAgyY',
+          'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjY2Mzg5MCwiZXhwIjoxNzIyNjY3NDkwfQ.SVeT7vE48COCtw7zkYpNyMA0TfuVNV8HmQEPDCCpAEk',
         },
       );
 
@@ -227,7 +229,7 @@ class _SchedulePageState extends State<SchedulePage> {
       },
       child: Center(
         child: Container(
-          margin: EdgeInsets.fromLTRB(8, 0,0,0),
+          margin: EdgeInsets.fromLTRB(0, 0,8,0),
           height: 82,
           width: 72,
           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
@@ -331,7 +333,7 @@ class _SchedulePageState extends State<SchedulePage> {
       print('Access Token: $accessToken');
 
       const url =
-          'https://3611-118-42-152-155.ngrok-free.app/api/createRoutine';
+          'https://c482-118-42-152-155.ngrok-free.app/api/createRoutine';
       final body = json.encode({
         'title': routineName,
         'startTime': DateFormat('HH:mm:ss').format(startTime),
@@ -345,7 +347,7 @@ class _SchedulePageState extends State<SchedulePage> {
       final headers = {
         'Content-Type': 'application/json',
         'Authorization':
-        'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjYwODk2NCwiZXhwIjoxNzIyNjEyNTY0fQ.SyTMHqWIPRCQQvlvcDKFPsPlS4URHTBsPXqfcPZAgyY',
+        'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjY2Mzg5MCwiZXhwIjoxNzIyNjY3NDkwfQ.SVeT7vE48COCtw7zkYpNyMA0TfuVNV8HmQEPDCCpAEk',
       };
       print('Request headers: $headers');
 
@@ -442,7 +444,7 @@ class _SchedulePageState extends State<SchedulePage> {
   Future<void> createschedule(
       int routineId, String content, DateTime notificationTime) async {
     final String apiUrl =
-        'https://3611-118-42-152-155.ngrok-free.app/api/routine/$routineId/create';
+        'https://c482-118-42-152-155.ngrok-free.app/api/routine/$routineId/create';
     try {
       final accessToken = await storage.read(key: 'ACCESS_TOKEN');
       if (accessToken == null) {
@@ -455,7 +457,7 @@ class _SchedulePageState extends State<SchedulePage> {
         headers: {
           'Content-Type': 'application/json',
           'Authorization':
-          'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjYwODk2NCwiZXhwIjoxNzIyNjEyNTY0fQ.SyTMHqWIPRCQQvlvcDKFPsPlS4URHTBsPXqfcPZAgyY',
+          'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjY2Mzg5MCwiZXhwIjoxNzIyNjY3NDkwfQ.SVeT7vE48COCtw7zkYpNyMA0TfuVNV8HmQEPDCCpAEk',
         },
         body: jsonEncode({
           'content': content,

@@ -39,7 +39,9 @@ class LoginScreen extends StatelessWidget {
               onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => KakaoLoginScreen()));
               },),
             SizedBox(height: 16,),
-            Image.asset('assets/images/login/google.png', width: 336, height: 56,),
+            GestureDetector(child: Image.asset('assets/images/login/google.png',  width: 336, height: 56,),
+              onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => KakaoLoginScreen()));
+              },),
             SizedBox(height: 26,),
           ],
 

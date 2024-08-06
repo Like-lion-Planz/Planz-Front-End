@@ -34,40 +34,48 @@ final List<String> concerns = [
 
 class _ConsultingState extends State<Consulting> {
   final storage = FlutterSecureStorage();
-  dynamic name = '';
+  dynamic setname = '';
 
   @override
   void initState(){
     super.initState();
-    fetchData();
+    getname();
+    //fetchData();
+  }
+  Future<void> getname() async {
+    final name = await storage.read(key: 'name');
+    setState(() {
+      setname = name ?? ""; // Handle null value to prevent errors
+      print(setname);
+    });
   }
 
-  Future<void> fetchData() async {
-    try {
-      final accessToken = await storage.read(key: 'ACCESS_TOKEN');
-      if(accessToken == null){
-        throw Exception('Access token is not available');
-      }
-      final response = await http.get(
-        Uri.parse('http://43.203.110.28:8080/api/user'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-
-      if(response.statusCode == 200){
-        setState(() {
-          name = responseData['name'];
-        });
-        print(name);
-      }
-    } catch (e) {
-      print('error fetching: $e');
-    }
-  }
+  // Future<void> fetchData() async {
+  //   try {
+  //     final accessToken = await storage.read(key: 'ACCESS_TOKEN');
+  //     if(accessToken == null){
+  //       throw Exception('Access token is not available');
+  //     }
+  //     final response = await http.get(
+  //       Uri.parse('http://43.203.110.28:8080/api/user'),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Bearer $accessToken',
+  //       },
+  //     );
+  //
+  //     final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+  //
+  //     if(response.statusCode == 200){
+  //       setState(() {
+  //         name = responseData['name'];
+  //       });
+  //       print(name);
+  //     }
+  //   } catch (e) {
+  //     print('error fetching: $e');
+  //   }
+  // }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,7 +129,7 @@ class _ConsultingState extends State<Consulting> {
                     SizedBox(height: 14,),
                     ConcernInfo(),
                     SizedBox(height: 70,),
-                    Text('$name님을 위한 추천 상담사', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700,fontFamily: 'SUIT', fontStyle: FontStyle.normal),),
+                    Text('$setname님을 위한 추천 상담사', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700,fontFamily: 'SUIT', fontStyle: FontStyle.normal),),
                     SizedBox(height: 14,),
                     Image.asset('assets/images/doctor/doctor1.png'),
                     SizedBox(height: 8,),

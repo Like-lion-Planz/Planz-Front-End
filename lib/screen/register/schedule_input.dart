@@ -120,12 +120,12 @@ class _ScheduleInputScreenState extends State<ScheduleInputScreen> {
       },
       child: Center(
         child: Container(
-          margin: EdgeInsets.fromLTRB(8, 0,0,0),
+          margin: EdgeInsets.fromLTRB(0, 0,8,0),
           height: 82,
           width: 72,
           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.blue : Color(0xFF2f2f30), // Change color if selected
+            color: isSelected ? primaryColor : Color(0xFF2f2f30), // Change color if selected
             borderRadius: BorderRadius.circular(8.0),
             border: Border.all(
               color: isSelected ? Colors.white : Colors.transparent,
@@ -166,11 +166,11 @@ class _ScheduleInputScreenState extends State<ScheduleInputScreen> {
       }
 
       final response = await http.get(
-        Uri.parse('https://3611-118-42-152-155.ngrok-free.app/api/routine'),
+        Uri.parse('https://c482-118-42-152-155.ngrok-free.app/api/routine'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization':
-          'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjYwODk2NCwiZXhwIjoxNzIyNjEyNTY0fQ.SyTMHqWIPRCQQvlvcDKFPsPlS4URHTBsPXqfcPZAgyY',
+          'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjY2Mzg5MCwiZXhwIjoxNzIyNjY3NDkwfQ.SVeT7vE48COCtw7zkYpNyMA0TfuVNV8HmQEPDCCpAEk',
         },
       );
 
@@ -204,7 +204,7 @@ class _ScheduleInputScreenState extends State<ScheduleInputScreen> {
       print('Access Token: $accessToken');
 
       const url =
-          'https://3611-118-42-152-155.ngrok-free.app/api/createRoutine';
+          'https://c482-118-42-152-155.ngrok-free.app/api/createRoutine';
       final body = json.encode({
         'title': routineName,
         'startTime': DateFormat('HH:mm:ss').format(startTime),
@@ -218,7 +218,7 @@ class _ScheduleInputScreenState extends State<ScheduleInputScreen> {
       final headers = {
         'Content-Type': 'application/json',
         'Authorization':
-        'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjYwODk2NCwiZXhwIjoxNzIyNjEyNTY0fQ.SyTMHqWIPRCQQvlvcDKFPsPlS4URHTBsPXqfcPZAgyY',
+        'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzNjM0MzI1NDc0IiwibmFtZSI6Iuy1nOuqheyerCIsImlhdCI6MTcyMjY2Mzg5MCwiZXhwIjoxNzIyNjY3NDkwfQ.SVeT7vE48COCtw7zkYpNyMA0TfuVNV8HmQEPDCCpAEk',
       };
       print('Request headers: $headers');
 

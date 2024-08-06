@@ -100,9 +100,10 @@ class _NameInputScreenState extends State<NameInputScreen> {
             ),
             Spacer(),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (name.isNotEmpty) {
                   changename();
+                  await storage.write(key: "name", value: name);
                 }
                 print(name);
               },

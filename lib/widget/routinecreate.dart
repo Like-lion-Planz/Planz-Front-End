@@ -18,7 +18,9 @@ class RoutineBottomSheet extends StatefulWidget {
 
 class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
   final TextEditingController _routineNameController =
-  TextEditingController(text: "데이");
+  TextEditingController(
+    text: "",
+  );
   DateTime? _startTime;
   DateTime? _endTime;
   DateTime _focusedDay = DateTime.now();
@@ -89,14 +91,17 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
           TextField(
             controller: _routineNameController,
             decoration: InputDecoration(
-              labelText: '루틴의 이름을 입력하세요',
+              labelText: "ex) 근무, 수업",
+              // hintText: "ex) 근무, 수업"
             ),
             onChanged: (_) => setState(() {}),
           ),
           SizedBox(height: 16),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '시작',
@@ -111,15 +116,24 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
                 ],
               ),
               SizedBox(
-                width: 49,
+                width: 20, // Reduced spacing to bring the sections closer together
               ),
               Container(
                 width: 2,
+                height: 50, // Adjusted height
                 color: Colors.grey,
               ),
+              SizedBox(
+                width: 20, // Adjusted spacing
+              ),
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('종료', style: TextStyle(color: primaryColor)),
+                  Text(
+                    '종료',
+                    style: TextStyle(color: primaryColor),
+                    textAlign: TextAlign.start,
+                  ),
                   Container(
                     child: CustomTimePicker(
                       onTimeChanged: _handleEndTimeChanged,
@@ -193,7 +207,9 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
                 color: primaryColor,
                 shape: BoxShape.circle,
               ),
-              selectedTextStyle: TextStyle(color: Colors.white),
+              selectedTextStyle: TextStyle(
+                color: Colors.black, // Changed color to black for selected text
+              ),
               todayDecoration: BoxDecoration(),
               defaultTextStyle: TextStyle(color: Colors.white),
               weekendTextStyle: TextStyle(color: Colors.white),
@@ -211,9 +227,7 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
                 _selectedDates,
               );
               Navigator.pop(context);
-              setState(() {
-
-              });
+              setState(() {});
             }
                 : null,
             style: ElevatedButton.styleFrom(
@@ -226,7 +240,6 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-
             child: Text(
               '저장',
               style: TextStyle(
@@ -236,7 +249,9 @@ class _RoutineBottomSheetState extends State<RoutineBottomSheet> {
               ),
             ),
           ),
-          SizedBox(height: 28,)
+          SizedBox(
+            height: 28,
+          )
         ],
       ),
     );
