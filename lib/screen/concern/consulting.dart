@@ -79,7 +79,7 @@ class _ConsultingState extends State<Consulting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: Color(0xff18191A),
       body: Stack(
         children: [
           Positioned(
@@ -88,7 +88,7 @@ class _ConsultingState extends State<Consulting> {
             right: 24,
             child: SearchBar(
               leading: Icon(Icons.search, color: Colors.white, size: 24, ),
-              backgroundColor: MaterialStatePropertyAll(Color(0xff2F2F30)),
+              backgroundColor: MaterialStatePropertyAll(Color(0xFF2F2F30)),
               shape: MaterialStateProperty.all(
                   ContinuousRectangleBorder(borderRadius: BorderRadius.circular(20))
               ),
@@ -99,7 +99,6 @@ class _ConsultingState extends State<Consulting> {
                 fontSize: 14, fontWeight: FontWeight.w500, height: 20/14,)),
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.only(top: 130.0), // 검색창 아래로 패딩 추가
             child: SingleChildScrollView(
@@ -114,13 +113,20 @@ class _ConsultingState extends State<Consulting> {
                     SizedBox(height: 12,),
                     Wrap(
                       spacing: 10,
+                      runSpacing: 10,
                       children: [
-                        ...concerns.map((concern) => Chip(
-                          backgroundColor: Color(0xFF515863),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24.0), // 원하는 값으로 변경
+                        ...concerns.map((concern) => Container(
+                          decoration: BoxDecoration(
+                            color: Color(0xFF2F2F30),
+                            borderRadius: BorderRadius.circular(24.0),
                           ),
-                          label: Text(concern, style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700,fontFamily: 'SUIT', fontStyle: FontStyle.normal),),
+                  child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      child: Text(
+                        concern,
+                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700,
+                            fontFamily: 'SUIT', fontStyle: FontStyle.normal),
+                      ),),
                         )),
                       ],
                     ),
