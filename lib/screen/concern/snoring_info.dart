@@ -9,9 +9,9 @@ class SnoringInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: Color(0xff18191A),
       appBar: AppBar(
-        backgroundColor: backgroundColor,
+        backgroundColor: Color(0xff18191A),
         leading: Row(
           children: [
             SizedBox(width: 8,),
